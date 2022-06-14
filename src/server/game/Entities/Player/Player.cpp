@@ -10969,10 +10969,16 @@ void Player::ToggleMetaGemsActive(uint8 exceptslot, bool apply)
     }
 }
 
-void Player::SetEntryPoint()
+void Player::ClearEntryPoint()
 {
     m_entryPointData.joinPos.m_mapId = MAPID_INVALID;
     m_entryPointData.ClearTaxiPath();
+    m_entryPointData.mountSpell = 0;
+}
+
+void Player::SetEntryPoint()
+{
+    ClearEntryPoint();
 
     if (!m_taxi.empty())
     {
@@ -10993,8 +10999,6 @@ void Player::SetEntryPoint()
             if (!auras.empty())
                 m_entryPointData.mountSpell = (*auras.begin())->GetId();
         }
-        else
-            m_entryPointData.mountSpell = 0;
 
         if (GetMap()->IsDungeon())
         {

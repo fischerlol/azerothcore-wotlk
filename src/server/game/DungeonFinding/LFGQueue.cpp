@@ -375,21 +375,7 @@ namespace lfg
             LFGMgr::CheckGroupRoles(proposalRoles);          // assing new roles
         }
 
-        bool hardcore = false;
-        if (check.size() == 1) {
-            for (LfgRolesMap::const_iterator itRoles = proposalRoles.begin(); itRoles != proposalRoles.end(); ++itRoles)
-            {
-                if (Player* player = ObjectAccessor::FindConnectedPlayer(itRoles->first))
-                {
-                    hardcore = player->HasAura(3758285);
-                    if (hardcore)
-                        break;
-                }
-            }
-        }
-
-        // Enough players?
-        if (!sLFGMgr->IsTesting() && !hardcore && check.size() == 1 && (numPlayers == 1 || (numPlayers < MAXGROUPSIZE && numLfgGroups == 1)))
+        if (!sLFGMgr->IsTesting() && check.size() == 1 && (numPlayers == 1 || (numPlayers < MAXGROUPSIZE && numLfgGroups == 1)))
         {
             strGuids.addRoles(proposalRoles);
             for (uint8 i = 0; i < 5 && check.guids[i]; ++i)
