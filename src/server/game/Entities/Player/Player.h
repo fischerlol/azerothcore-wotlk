@@ -2304,6 +2304,7 @@ public:
     [[nodiscard]] WorldLocation GetStartPosition() const;
 
     [[nodiscard]] WorldLocation const& GetEntryPoint() const { return m_entryPointData.joinPos; }
+    void ClearEntryPoint();
     void SetEntryPoint();
 
     // currently visible objects at player client
