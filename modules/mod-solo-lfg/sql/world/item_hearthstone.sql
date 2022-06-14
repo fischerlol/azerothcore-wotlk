@@ -1,0 +1,1 @@
+UPDATE item_template SET ScriptName = "item_hearthstone" WHERE entry = 6948;
