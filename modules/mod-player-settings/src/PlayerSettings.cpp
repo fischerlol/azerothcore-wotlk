@@ -8,6 +8,7 @@
 #include "Unit.h"
 #include "Formulas.h"
 #include "Group.h"
+#include "DBUpdater.h"
 #include <algorithm>
 #include <cstdlib>
 #include <vector>
@@ -40,7 +41,7 @@ class PlayerSettingsMapInfo : public DataMap::Base
 {
 public:
     PlayerSettingsMapInfo() {}
-    bool isLevelScaling = true;
+    bool isLfgGroup = false;
     uint32 nplayers = 0;
     uint32 veto = 0;
     std::map<uint32, float> honor;
@@ -264,72 +265,32 @@ public:
 
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage) override
     {
-        if (!target || !target->GetMap())
-            return;
-
-        if (!attacker || !attacker->GetMap())
-            return;
-
-        if (!inDungeon(target, attacker) || inBattleground(target, attacker))
-            return;
-
-        damage = modify(attacker, target, damage);
+        if (check(attacker, target))
+            damage = modify(attacker, target, damage);
     }
 
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
     {
-        if (!target || !target->GetMap())
-            return;
-
-        if (!attacker || !attacker->GetMap())
-            return;
-
-        if (!inDungeon(target, attacker) || inBattleground(target, attacker))
-            return;
-
-        damage = modify(attacker, target, damage);
+        if (check(attacker, target))
+            damage = modify(attacker, target, damage);
     }
 
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage) override
     {
-        if (!target || !target->GetMap())
-            return;
-
-        if (!attacker || !attacker->GetMap())
-            return;
-
-        if (!inDungeon(target, attacker) || inBattleground(target, attacker))
-            return;
-
-        damage = modify(attacker, target, damage);
+        if (check(attacker, target))
+            damage = modify(attacker, target, damage);
     }
 
     void ModifyPeriodicHealthAurasTick(Unit* target, Unit* healer, uint32& gain) override
     {
-        if (!target || !target->GetMap())
-            return;
-
-        if (!healer || !healer->GetMap())
-            return;
-
-        if (!inDungeon(target, healer) || inBattleground(target, healer))
-            return;
-
-        gain = modify(healer, target, gain);
+        if (check(healer, target))
+            gain = modify(healer, target, gain);
     }
 
     void ModifyHealRecieved(Unit* target, Unit* healer, uint32& gain) override
     {
-        if (!target || !target->GetMap())
-            return;
-
-        if (!healer || !healer->GetMap())
-            return;
-
-        if (!inDungeon(target, healer) || inBattleground(target, healer))
-            return;
-
-        gain = modify(healer, target, gain);
+        if (check(healer, target))
+            gain = modify(healer, target, gain);
     }
 
 private:
@@ -341,6 +302,20 @@ private:
     bool inBattleground(Unit *target, Unit *attacker)
     {
         return target->GetMap()->IsBattleground() && attacker->GetMap()->IsBattleground();
+    }
+
+    bool check(Unit* attacker, Unit* target)
+    {
+        if (!target || !target->GetMap())
+            return false;
+
+        if (!attacker || !attacker->GetMap())
+            return false;
+
+        if (!inDungeon(target, attacker) || inBattleground(target, attacker))
+            return false;
+
+        return true;
     }
 
     uint32 modify(Unit* attacker, Unit* target, uint32 amount)
@@ -367,7 +342,7 @@ private:
         if (!isAttackerPlayer && !isPet)
             multiplier = defence + (1 - defence) / (maxPlayers - 1) * (nplayers - 1);
 
-        if (!instanceMap->IsRaidOrHeroicDungeon() && mapInfo->isLevelScaling)
+        if (!instanceMap->IsRaidOrHeroicDungeon() && mapInfo->isLfgGroup)
         {
             if (!isAttackerPlayer && isTargetPlayer)
                 multiplier = multiplier * playerCurve(target->getLevel()) / playerCurve(attacker->getLevel());
@@ -410,6 +385,11 @@ public:
 
         if (mapInfo->veto == 0)
             mapInfo->veto = mapInfo->nplayers;
+
+        Group* group = player->GetGroup();
+
+        if (group)
+            mapInfo->isLfgGroup = sLFGMgr->IsLfgGroup(group->GetGUID());
 
         if (map->GetEntry()->IsDungeon() && player)
         {
@@ -536,47 +516,10 @@ public:
         static Acore::ChatCommands::ChatCommandTable commands =
         {
             {"players", HandlePlayersCommand, SEC_PLAYER, Acore::ChatCommands::Console::No},
-            {"playersettings", HandlePlayerSettingsCommand, SEC_PLAYER, Acore::ChatCommands::Console::No},
-            {"togglelevelscaling", HandleLevelScalingCommand, SEC_PLAYER, Acore::ChatCommands::Console::No}
+            {"playersettings", HandlePlayerSettingsCommand, SEC_PLAYER, Acore::ChatCommands::Console::No}
         };
 
         return commands;
-    }
-
-    static bool HandleLevelScalingCommand(ChatHandler *handler)
-    {
-        Player *player = handler->getSelectedPlayerOrSelf();
-        Map *map = player->GetMap();
-
-        if (!map->IsDungeon())
-        {
-            handler->SendSysMessage("Only usable in dungeons.");
-            return true;
-        }
-
-        Map::PlayerList const &players = map->GetPlayers();
-
-        for (Map::PlayerList::const_iterator iter = players.begin(); iter != players.end(); ++iter)
-        {
-            if (Player *player = iter->GetSource())
-            {
-                if (player->IsInCombat())
-                {
-                    handler->SendSysMessage("Only usable outside of combat.");
-                    return true;
-                }
-            }
-        }
-
-        PlayerSettingsMapInfo *mapInfo = map->CustomData.GetDefault<PlayerSettingsMapInfo>("PlayerSettingsMapInfo");
-        mapInfo->isLevelScaling = !mapInfo->isLevelScaling;
-
-        if (mapInfo->isLevelScaling)
-            handler->SendSysMessage("Level scaling enabled.");
-        else
-            handler->SendSysMessage("Level scaling disabled.");
-        
-        return true;
     }
 
     static bool HandlePlayersCommand(ChatHandler *handler, std::string args)
@@ -687,6 +630,38 @@ public:
     }
 };
 
+class PlayerSettingsDatabase : public DatabaseScript
+{
+public:
+    PlayerSettingsDatabase() : DatabaseScript("PlayerSettingsDatabase") {}
+
+    std::string path = "/modules/mod-player-settings/sql/";
+    void OnAfterDatabasesLoaded(uint32 updateFlags) override
+    {
+        if (DBUpdater<LoginDatabaseConnection>::IsEnabled(updateFlags))
+        {
+            std::vector<std::string> directories;
+            directories.push_back(path + "auth");
+            DBUpdater<LoginDatabaseConnection>::Update(LoginDatabase, &directories);
+        }
+
+        if (DBUpdater<CharacterDatabaseConnection>::IsEnabled(updateFlags))
+        {
+            std::vector<std::string> directories;
+            directories.push_back(path + "characters");
+            DBUpdater<CharacterDatabaseConnection>::Update(CharacterDatabase, &directories);
+        }
+
+        if (DBUpdater<WorldDatabaseConnection>::IsEnabled(updateFlags))
+        {
+            std::vector<std::string> directories;
+            directories.push_back(path + "world");
+            DBUpdater<WorldDatabaseConnection>::Update(WorldDatabase, &directories);
+        }
+    }
+};
+
+
 void AddPlayerSettingsScripts()
 {
     new PlayerSettingsWorldScript();
@@ -695,4 +670,5 @@ void AddPlayerSettingsScripts()
     new PlayerSettingsAllMapScript();
     new PlayerSettingsAllCreatureScript();
     new PlayerSettingsCommandScript();
+    new PlayerSettingsDatabase();
 }
