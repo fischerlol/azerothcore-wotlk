@@ -4,7 +4,7 @@
 
 void AddLFGScripts();
 
-void Addmod_solo_lfgScripts()
+void Addmod_looking_for_groupScripts()
 {
     AddLFGScripts();
 }
