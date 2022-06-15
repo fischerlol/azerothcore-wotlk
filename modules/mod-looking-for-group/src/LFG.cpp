@@ -306,7 +306,7 @@ class LFGDatabase : public DatabaseScript
 public:
     LFGDatabase() : DatabaseScript("LFGDatabase") {}
 
-    std::string path = "/modules/mod-lfg/sql/";
+    std::string path = "/modules/mod-looking-for-group/sql/";
     void OnAfterDatabasesLoaded(uint32 updateFlags) override
     {
         if (DBUpdater<LoginDatabaseConnection>::IsEnabled(updateFlags))
