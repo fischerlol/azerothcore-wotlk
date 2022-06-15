@@ -1,3 +1,4 @@
+#include <climits>
 #include <random>
 #include "Common.h"
 #include "Chat.h"
@@ -21,19 +22,27 @@ public:
             return true;
 
         uint32 dungeonId = randomDungeon(dungeons);
-        summonGroup(player, dungeonId);
+        transport(player, dungeonId);
         return false;
     }
 
     void OnQueueRandomDungeon(Player* player, uint32& rDungeonId) override 
     {
         lfg::LfgDungeonSet const& dungeons = sLFGMgr->GetDungeonsByRandom(rDungeonId);
-        uint32 minlevel = 80;
-        uint32 maxlevel = 1;
+
+        if (dungeons.empty())
+            return;
+
+        uint32 minlevel = UINT_MAX;
+        uint32 maxlevel = 0;
+        uint32 level = player->getLevel();
 
         for (lfg::LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end(); it++)
         {
             lfg::LFGDungeonData const* dungeon = sLFGMgr->GetLFGDungeon(*it);
+
+            if (level < dungeon->minlevel || level > dungeon->maxlevel)
+                continue;
             
             if (minlevel > dungeon->minlevel)
                 minlevel = dungeon->minlevel;
@@ -42,7 +51,57 @@ public:
                 maxlevel = dungeon->maxlevel;
         }
 
-        announceRandomDungeon(player, minlevel, maxlevel);
+        if (minlevel != UINT_MAX && maxlevel != 0)
+            Announce(player, minlevel, maxlevel);
+    }
+
+    static void Announce(Player* player, uint32 minlevel, uint32 maxlevel)
+    {
+        uint32 count;
+        Player* leader;
+
+        getLeaderAndCount(player, &leader, &count);
+        announceToSession(player->GetSession(), minlevel, maxlevel, count, leader->GetPlayerName());
+
+        const SessionMap& sessions = sWorld->GetAllSessions();
+        for (SessionMap::const_iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
+        {
+            if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
+                continue;
+
+            if (player == itr->second->GetPlayer())
+                continue;
+
+            announceToSession(itr->second, minlevel, maxlevel, count, leader->GetPlayerName());
+        }
+    }
+
+    static lfg::LfgTeleportError CanTeleport(Player* player)
+    {
+        lfg::LfgTeleportError error = lfg::LFG_TELEPORTERROR_OK;
+
+        if (!player->IsAlive())
+        {
+            error = lfg::LFG_TELEPORTERROR_PLAYER_DEAD;
+        }
+        else if (player->IsFalling() || player->HasUnitState(UNIT_STATE_JUMPING))
+        {
+            error = lfg::LFG_TELEPORTERROR_FALLING;
+        }
+        else if (player->IsMirrorTimerActive(FATIGUE_TIMER))
+        {
+            error = lfg::LFG_TELEPORTERROR_FATIGUE;
+        }
+        else if (player->GetVehicle())
+        {
+            error = lfg::LFG_TELEPORTERROR_IN_VEHICLE;
+        }
+        else if (player->GetCharmGUID() || player->IsInCombat())
+        {
+            error = lfg::LFG_TELEPORTERROR_COMBAT;
+        }
+
+        return error;
     }
 
 private:
@@ -84,32 +143,30 @@ private:
         return *it;
     }
 
-    bool summonGroup(Player* player, uint32 id)
+    bool transport(Player* leader, uint32 id)
     {
         lfg::LFGDungeonData const* dungeon = sLFGMgr->GetLFGDungeon(id);
 
         if (!dungeon)
         {
-            player->GetSession()->SendLfgTeleportError(uint8(lfg::LFG_TELEPORTERROR_INVALID_LOCATION));
+            leader->GetSession()->SendLfgTeleportError(uint8(lfg::LFG_TELEPORTERROR_INVALID_LOCATION));
             return false;
         }
 
-        lfg::LfgTeleportError error = canTeleport(player);
+        lfg::LfgTeleportError error = CanTeleport(leader);
         if (error == lfg::LFG_TELEPORTERROR_OK)
-            error = summonGroupToDungeon(player, dungeon);
+            error = transportToDungeon(leader, dungeon);
 
         if (error != lfg::LFG_TELEPORTERROR_OK)
         {
-            player->GetSession()->SendLfgTeleportError(uint8(error));
+            leader->GetSession()->SendLfgTeleportError(uint8(error));
             return false;
         }
-
-        announceSpecificDungeon(player, dungeon);
 
         return true;
     }
 
-    void getLeaderAndCount(Player* player, Player** leader, uint32* count)
+    static void getLeaderAndCount(Player* player, Player** leader, uint32* count)
     {
         *leader = player;
         *count = 1;
@@ -126,106 +183,26 @@ private:
         }
     }
 
-    void announceRandomDungeon(Player* player, uint32 minlevel, uint32 maxlevel)
-    {
-        uint32 count;
-        Player* leader;
-
-        getLeaderAndCount(player, &leader, &count);
-        announceRandomDungeonToSession(player->GetSession(), minlevel, maxlevel, count, leader->GetPlayerName());
-
-        const SessionMap& sessions = sWorld->GetAllSessions();
-        for (SessionMap::const_iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
-        {
-            if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
-                continue;
-            
-            if (player == itr->second->GetPlayer())
-                continue;
-            
-            announceRandomDungeonToSession(itr->second, minlevel, maxlevel, count, leader->GetPlayerName());
-        }
-    }
-
-    void announceRandomDungeonToSession(WorldSession* session, uint32 minlevel, uint32 maxlevel, uint32 count, std::string leader)
+    static void announceToSession(WorldSession* session, uint32 minlevel, uint32 maxlevel, uint32 count, std::string name)
     {
         if (count == 1)
             ChatHandler(session).PSendSysMessage(
                 "|cff00CC00[LFG Queue Announcer]:|r Random Dungeon -- [%u-%u][%u/5] Join %s now!",
-                minlevel, maxlevel, count, leader.c_str()
+                minlevel, maxlevel, count, name.c_str()
             );
         else if (count < 5)
             ChatHandler(session).PSendSysMessage(
                 "|cff00CC00[LFG Queue Announcer]:|r Random Dungeon -- [%u-%u][%u/5] Ask %s to open it up!",
-                minlevel, maxlevel, count, leader.c_str()
-            );
-    }
-
-    void announceSpecificDungeon(Player* player, lfg::LFGDungeonData const* dungeon)
-    {
-        uint32 count;
-        Player* leader;
-
-        getLeaderAndCount(player, &leader, &count);
-
-        announceSpecificDungeonToSession(player->GetSession(), dungeon->name, dungeon->minlevel, dungeon->maxlevel, count, leader->GetPlayerName());
-
-        const SessionMap& sessions = sWorld->GetAllSessions();
-        for (SessionMap::const_iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
-        {
-            if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
-                continue;
-            
-            if (player == itr->second->GetPlayer())
-                continue;
-
-            announceSpecificDungeonToSession(itr->second, dungeon->name, dungeon->minlevel, dungeon->maxlevel, count, leader->GetPlayerName());
-        }
-    }
-
-    void announceSpecificDungeonToSession(WorldSession* session, std::string name, uint32 minlevel, uint32 maxlevel, uint32 count, std::string leader)
-    {
-        if (count < 5)
-            ChatHandler(session).PSendSysMessage(
-                "|cff00CC00[LFG Queue Announcer]:|r %s -- [%u-%u][%u/5] Ask %s for an invite!",
-                name.c_str(), minlevel, maxlevel, count, leader.c_str()
+                minlevel, maxlevel, count, name.c_str()
             );
         else
             ChatHandler(session).PSendSysMessage(
-                "|cff00CC00[LFG Queue Announcer]:|r %s -- [%u-%u][%u/5]",
-                name.c_str(), minlevel, maxlevel, count, leader.c_str()
+                "|cff00CC00[LFG Queue Announcer]:|r Random Dungeon -- [%u-%u][%u/5]",
+                minlevel, maxlevel, count, name.c_str()
             );
     }
 
-    lfg::LfgTeleportError canTeleport(Player* player)
-    {
-        lfg::LfgTeleportError error = lfg::LFG_TELEPORTERROR_OK;
-
-        if (!player->IsAlive())
-        {
-            error = lfg::LFG_TELEPORTERROR_PLAYER_DEAD;
-        }
-        else if (player->IsFalling() || player->HasUnitState(UNIT_STATE_JUMPING))
-        {
-            error = lfg::LFG_TELEPORTERROR_FALLING;
-        }
-        else if (player->IsMirrorTimerActive(FATIGUE_TIMER))
-        {
-            error = lfg::LFG_TELEPORTERROR_FATIGUE;
-        }
-        else if (player->GetVehicle())
-        {
-            error = lfg::LFG_TELEPORTERROR_IN_VEHICLE;
-        }
-        else if (player->GetCharmGUID() || player->IsInCombat())
-        {
-            error = lfg::LFG_TELEPORTERROR_COMBAT;
-        }
-
-        return error;
-    }
-
-    lfg::LfgTeleportError summonGroupToDungeon(Player* leader, lfg::LFGDungeonData const* dungeon)
+    lfg::LfgTeleportError transportToDungeon(Player* leader, lfg::LFGDungeonData const* dungeon)
     {
         uint32 mapid = dungeon->map;
         float x = dungeon->x;
@@ -279,19 +256,20 @@ class LFGGroup : public GroupScript
 public:
     LFGGroup() : GroupScript("LFGGroup") {}
 
-    void OnCreate(Group* group, Player* leader)
-    {
-        if (group->isLFGGroup())
-            ChatHandler(leader->GetSession()).SendSysMessage("Group created!");
-    }
-
     void OnAddMember(Group* group, ObjectGuid guid)
     {
-        if (group->isLFGGroup())
-        {
-            Player* player = ObjectAccessor::FindConnectedPlayer(guid);
-            ChatHandler(player->GetSession()).SendSysMessage("Member added!");
-        }
+        Player* player = ObjectAccessor::FindConnectedPlayer(guid);
+
+        if (!player || player->GetGUID() == group->GetLeaderGUID() || !group->isLFGGroup())
+            return;
+
+        uint32 dungeonId = sLFGMgr->GetDungeon(group->GetGUID(), true);
+        lfg::LFGDungeonData const* dungeon = sLFGMgr->GetLFGDungeon(dungeonId);
+
+        if (!dungeon)
+            return;
+
+        LFGPlayer::Announce(player, dungeon->minlevel, dungeon->maxlevel);
     }
 };
 
@@ -313,7 +291,13 @@ public:
             return true;
         }
 
-        return player->TeleportToEntryPoint();
+        if (LFGPlayer::CanTeleport(player) == lfg::LFG_TELEPORTERROR_OK)
+        {
+            player->TeleportToEntryPoint();
+            player->ClearEntryPoint();
+        }
+
+        return true;
     }
 };
 
