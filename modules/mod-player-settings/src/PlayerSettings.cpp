@@ -7,34 +7,23 @@
 #include "ScriptMgrMacros.h"
 #include "Unit.h"
 #include "Formulas.h"
+#include "Group.h"
 #include <algorithm>
 #include <cstdlib>
 #include <vector>
 
-// DPS count as 1 offensive unit and tanks count as 0.5 offensive units.
-// Healers count as 1 defensive unit and tanks count as 0.5 defensive units.
+// DPS count as 1 offensive unit. Tanks and healers count as 1 defensive unit.
 
-// 5 man: 1 tank, 3 dps, 1 healer = 3.5 offensive units and 1.5 defensive units.
-const float Offence5M = 1 / 3.5f, Defence5M = 1 / 1.5f;
-
-// 10 man: 2 tank, 6 dps, 2 healer = 7.0 offensive units and 3.0 defensive units.
-const float Offence10M = 1 / 7.0f, Defence10M = 1 / 3.0f;
-
-// 20 man: 2 tank, 14 dps, 4 healer = 14.5 offensive units and 6.5 defensive units
-const float Offence20M = 1 / 15.0f, Defence20M = 1 / 5.0f;
-
-// 25 man: 3 tank, 17 dps, 5 healer = 18.5 offensive units and 6.5 defensive units.
-const float Offence25M = 1 / 18.5f, Defence25M = 1 / 6.5f;
-
-// 40 man: 4 tank, 28 dps, 8 healer = 30.0 offensive units and 10.0 defensive units.
-const float Offence40M = 1 / 30.0f, Defence40M = 1 / 10.0f;
+// 5 man: 1 tank, 3 dps, 1 healer = 3 offensive units and 2 defensive units.
+const float Offence5M = 1 / 3.0f, Defence5M = 1 / 2.0f;
 
 enum Spells
 {
     SPELL_LUCIFRON_CURSE = 19703,
     SPELL_GEHENNAS_CURSE = 19716,
     SPELL_IGNITE_MANA = 19659,
-    SPELL_SHAZZRAH_CURSE = 19713
+    SPELL_SHAZZRAH_CURSE = 19713,
+    SPELL_BURNING_ADRENALINE = 18173
 };
 
 class PlayerSettingsCreatureInfo : public DataMap::Base
@@ -51,7 +40,7 @@ class PlayerSettingsMapInfo : public DataMap::Base
 {
 public:
     PlayerSettingsMapInfo() {}
-    PlayerSettingsMapInfo(uint32 count) : nplayers(count), veto(count) {}
+    bool isLevelScaling = true;
     uint32 nplayers = 0;
     uint32 veto = 0;
     std::map<uint32, float> honor;
@@ -196,6 +185,11 @@ public:
 
         if (shazzrah)
             player->RemoveAura(shazzrah);
+
+        Aura* vaelastrasz = player->GetAura(SPELL_BURNING_ADRENALINE);
+
+        if (vaelastrasz)
+            player->RemoveAura(vaelastrasz);
     }
 
 private:
@@ -279,13 +273,7 @@ public:
         if (!inDungeon(target, attacker) || inBattleground(target, attacker))
             return;
 
-        if (attacker->GetTypeId() == TYPEID_PLAYER && !attacker->GetCharmerGUID() && attacker->GetGUID() != target->GetGUID())
-            return;
-
-        if ((attacker->IsHunterPet() || attacker->IsPet() || attacker->IsSummon()) && attacker->IsControlledByPlayer())
-            return;
-
-        damage = modify(target, damage);
+        damage = modify(attacker, target, damage);
     }
 
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
@@ -299,13 +287,7 @@ public:
         if (!inDungeon(target, attacker) || inBattleground(target, attacker))
             return;
 
-        if (attacker->GetTypeId() == TYPEID_PLAYER && !attacker->GetCharmerGUID() && attacker->GetGUID() != target->GetGUID())
-            return;
-
-        if ((attacker->IsHunterPet() || attacker->IsPet() || attacker->IsSummon()) && attacker->IsControlledByPlayer())
-            return;
-
-        damage = modify(target, damage);
+        damage = modify(attacker, target, damage);
     }
 
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage) override
@@ -319,13 +301,7 @@ public:
         if (!inDungeon(target, attacker) || inBattleground(target, attacker))
             return;
 
-        if (attacker->GetTypeId() == TYPEID_PLAYER && !attacker->GetCharmerGUID() && attacker->GetGUID() != target->GetGUID())
-            return;
-
-        if ((attacker->IsHunterPet() || attacker->IsPet() || attacker->IsSummon()) && attacker->IsControlledByPlayer())
-            return;
-
-        damage = modify(target, damage);
+        damage = modify(attacker, target, damage);
     }
 
     void ModifyPeriodicHealthAurasTick(Unit* target, Unit* healer, uint32& gain) override
@@ -339,10 +315,7 @@ public:
         if (!inDungeon(target, healer) || inBattleground(target, healer))
             return;
 
-        if (target->GetTypeId() == TYPEID_PLAYER || healer->GetTypeId() == TYPEID_PLAYER)
-            return;
-
-        gain = modify(target, gain);
+        gain = modify(healer, target, gain);
     }
 
     void ModifyHealRecieved(Unit* target, Unit* healer, uint32& gain) override
@@ -356,10 +329,7 @@ public:
         if (!inDungeon(target, healer) || inBattleground(target, healer))
             return;
 
-        if (target->GetTypeId() == TYPEID_PLAYER || healer->GetTypeId() == TYPEID_PLAYER)
-            return;
-
-        gain = modify(target, gain);
+        gain = modify(healer, target, gain);
     }
 
 private:
@@ -373,7 +343,7 @@ private:
         return target->GetMap()->IsBattleground() && attacker->GetMap()->IsBattleground();
     }
 
-    uint32 modify(Unit *target, uint32 amount)
+    uint32 modify(Unit* attacker, Unit* target, uint32 amount)
     {
         PlayerSettingsMapInfo *mapInfo = target->GetMap()->CustomData.GetDefault<PlayerSettingsMapInfo>("PlayerSettingsMapInfo");
         InstanceMap *instanceMap = ((InstanceMap *)sMapMgr->FindMap(target->GetMapId(), target->GetInstanceId()));
@@ -386,26 +356,36 @@ private:
 
         float defence = Defence5M;
 
-        switch (maxPlayers)
+        if (maxPlayers > 5)
+            defence = 1 / (2 + (maxPlayers / 5.0f));
+
+        float multiplier = 1;
+        bool isPet = (attacker->IsHunterPet() || attacker->IsPet() || attacker->IsSummon()) && attacker->IsControlledByPlayer();
+        bool isAttackerPlayer = attacker->GetTypeId() == TYPEID_PLAYER;
+        bool isTargetPlayer = target->GetTypeId() == TYPEID_PLAYER;
+
+        if (!isAttackerPlayer && !isPet)
+            multiplier = defence + (1 - defence) / (maxPlayers - 1) * (nplayers - 1);
+
+        if (!instanceMap->IsRaidOrHeroicDungeon() && mapInfo->isLevelScaling)
         {
-        case 10:
-            defence = Defence10M;
-            break;
-        case 20:
-            defence = Defence20M;
-        case 25:
-            defence = Defence25M;
-            break;
-        case 40:
-            defence = Defence40M;
-            break;
-        default:
-            break;
+            if (!isAttackerPlayer && isTargetPlayer)
+                multiplier = multiplier * playerCurve(target->getLevel()) / playerCurve(attacker->getLevel());
+            else if (isAttackerPlayer && !isTargetPlayer)
+                multiplier = creatureCurve(target->getLevel()) / creatureCurve(attacker->getLevel());
         }
 
-        float multiplier = defence + (1 - defence) / (maxPlayers - 1) * (nplayers - 1);
-
         return amount * multiplier;
+    }
+
+    static float playerCurve(uint32 level)
+    {
+        return 45.2 * exp(0.0647 * level);
+    }
+
+    static float creatureCurve(uint32 level)
+    {
+        return 71.7 + 5.98 * level + 0.738 * pow(level, 2);
     }
 };
 
@@ -525,25 +505,10 @@ public:
 
         float offence = Offence5M;
 
-        switch (instanceMap->GetMaxPlayers())
-        {
-        case 10:
-            offence = Offence10M;
-            break;
-        case 20:
-            offence = Offence20M;
-        case 25:
-            offence = Offence25M;
-            break;
-        case 40:
-            offence = Offence40M;
-            break;
-        default:
-            break;
-        }
+        if (maxPlayers > 5)
+            offence = 1 / (maxPlayers - (2 + (maxPlayers / 5.0f)));
 
         creatureInfo->HealthMultiplier = offence + (1 - offence) / (maxPlayers - 1) * (nplayers - 1);
-
         scaledHealth = round(((float)baseHealth * creatureInfo->HealthMultiplier) + 1.0f);
 
         uint32 previousHealth = creature->GetHealth();
@@ -571,10 +536,47 @@ public:
         static Acore::ChatCommands::ChatCommandTable commands =
         {
             {"players", HandlePlayersCommand, SEC_PLAYER, Acore::ChatCommands::Console::No},
-            {"playersettings", HandlePlayerSettingsCommand, SEC_PLAYER, Acore::ChatCommands::Console::No}
+            {"playersettings", HandlePlayerSettingsCommand, SEC_PLAYER, Acore::ChatCommands::Console::No},
+            {"togglelevelscaling", HandleLevelScalingCommand, SEC_PLAYER, Acore::ChatCommands::Console::No}
         };
 
         return commands;
+    }
+
+    static bool HandleLevelScalingCommand(ChatHandler *handler)
+    {
+        Player *player = handler->getSelectedPlayerOrSelf();
+        Map *map = player->GetMap();
+
+        if (!map->IsDungeon())
+        {
+            handler->SendSysMessage("Only usable in dungeons.");
+            return true;
+        }
+
+        Map::PlayerList const &players = map->GetPlayers();
+
+        for (Map::PlayerList::const_iterator iter = players.begin(); iter != players.end(); ++iter)
+        {
+            if (Player *player = iter->GetSource())
+            {
+                if (player->IsInCombat())
+                {
+                    handler->SendSysMessage("Only usable outside of combat.");
+                    return true;
+                }
+            }
+        }
+
+        PlayerSettingsMapInfo *mapInfo = map->CustomData.GetDefault<PlayerSettingsMapInfo>("PlayerSettingsMapInfo");
+        mapInfo->isLevelScaling = !mapInfo->isLevelScaling;
+
+        if (mapInfo->isLevelScaling)
+            handler->SendSysMessage("Level scaling enabled.");
+        else
+            handler->SendSysMessage("Level scaling disabled.");
+        
+        return true;
     }
 
     static bool HandlePlayersCommand(ChatHandler *handler, std::string args)
@@ -660,25 +662,13 @@ public:
         float offence = Offence5M;
         float defence = Defence5M;
 
-        switch (instanceMap->GetMaxPlayers())
+        if (maxPlayers > 5)
         {
-        case 10:
-            offence = Offence10M;
-            defence = Defence10M;
-            break;
-        case 20:
-            offence = Offence20M;
-            defence = Defence20M;
-        case 25:
-            offence = Offence25M;
-            defence = Defence25M;
-            break;
-        case 40:
-            offence = Offence40M;
-            defence = Defence40M;
-            break;
-        default:
-            break;
+            float tanks = 2.0f;
+            float healers = maxPlayers / 5.0f;
+            float dps = maxPlayers - (tanks + healers);
+            offence = 1 / dps;
+            defence = 1 / (tanks + healers);
         }
 
         uint32 nplayers = std::max(mapInfo->nplayers, mapInfo->veto);
