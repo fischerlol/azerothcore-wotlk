@@ -1,4 +1,5 @@
 #include <random>
+#include "Common.h"
 #include "Chat.h"
 #include "ScriptMgr.h"
 #include "LFGMgr.h"
@@ -6,6 +7,8 @@
 #include "DBUpdater.h"
 #include "Group.h"
 #include "ObjectAccessor.h"
+#include "Spell.h"
+#include "MapMgr.h"
 
 class LFGPlayer : public PlayerScript
 {
@@ -18,7 +21,7 @@ public:
             return true;
 
         uint32 dungeonId = randomDungeon(dungeons);
-        teleportDungeon(player, dungeonId);
+        summonGroup(player, dungeonId);
         return false;
     }
 
@@ -81,7 +84,7 @@ private:
         return *it;
     }
 
-    bool teleportDungeon(Player* player, uint32 id)
+    bool summonGroup(Player* player, uint32 id)
     {
         lfg::LFGDungeonData const* dungeon = sLFGMgr->GetLFGDungeon(id);
 
@@ -93,7 +96,7 @@ private:
 
         lfg::LfgTeleportError error = canTeleport(player);
         if (error == lfg::LFG_TELEPORTERROR_OK)
-            error = tryTeleport(player, dungeon);
+            error = summonGroupToDungeon(player, dungeon);
 
         if (error != lfg::LFG_TELEPORTERROR_OK)
         {
@@ -106,9 +109,9 @@ private:
         return true;
     }
 
-    void getLeaderAndCount(Player* player, std::string* leader, uint32* count)
+    void getLeaderAndCount(Player* player, Player** leader, uint32* count)
     {
-        *leader = player->GetPlayerName();
+        *leader = player;
         *count = 1;
         Group* group = player->GetGroup();
 
@@ -119,17 +122,17 @@ private:
             for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
                 if (Player* member = itr->GetSource())
                     if (group->GetLeaderGUID() == member->GetGUID())
-                        *leader = member->GetPlayerName();
+                        *leader = member;
         }
     }
 
     void announceRandomDungeon(Player* player, uint32 minlevel, uint32 maxlevel)
     {
         uint32 count;
-        std::string leader;
+        Player* leader;
 
         getLeaderAndCount(player, &leader, &count);
-        announceRandomDungeonToSession(player->GetSession(), minlevel, maxlevel, count, leader);
+        announceRandomDungeonToSession(player->GetSession(), minlevel, maxlevel, count, leader->GetPlayerName());
 
         const SessionMap& sessions = sWorld->GetAllSessions();
         for (SessionMap::const_iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
@@ -140,7 +143,7 @@ private:
             if (player == itr->second->GetPlayer())
                 continue;
             
-            announceRandomDungeonToSession(itr->second, minlevel, maxlevel, count, leader);
+            announceRandomDungeonToSession(itr->second, minlevel, maxlevel, count, leader->GetPlayerName());
         }
     }
 
@@ -161,11 +164,11 @@ private:
     void announceSpecificDungeon(Player* player, lfg::LFGDungeonData const* dungeon)
     {
         uint32 count;
-        std::string leader;
+        Player* leader;
 
         getLeaderAndCount(player, &leader, &count);
 
-        announceSpecificDungeonToSession(player->GetSession(), dungeon->name, dungeon->minlevel, dungeon->maxlevel, count, leader);
+        announceSpecificDungeonToSession(player->GetSession(), dungeon->name, dungeon->minlevel, dungeon->maxlevel, count, leader->GetPlayerName());
 
         const SessionMap& sessions = sWorld->GetAllSessions();
         for (SessionMap::const_iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
@@ -176,7 +179,7 @@ private:
             if (player == itr->second->GetPlayer())
                 continue;
 
-            announceSpecificDungeonToSession(itr->second, dungeon->name, dungeon->minlevel, dungeon->maxlevel, count, leader);
+            announceSpecificDungeonToSession(itr->second, dungeon->name, dungeon->minlevel, dungeon->maxlevel, count, leader->GetPlayerName());
         }
     }
 
@@ -222,22 +225,52 @@ private:
         return error;
     }
 
-    lfg::LfgTeleportError tryTeleport(Player* player, lfg::LFGDungeonData const* dungeon)
+    lfg::LfgTeleportError summonGroupToDungeon(Player* leader, lfg::LFGDungeonData const* dungeon)
     {
         uint32 mapid = dungeon->map;
         float x = dungeon->x;
         float y = dungeon->y;
         float z = dungeon->z;
         float orientation = dungeon->o;
+        uint32 zoneid = sMapMgr->GetZoneId(leader->GetPhaseMask(), mapid, x, y, z);
+
+        if (!leader->GetMap()->IsDungeon() || leader->GetEntryPoint().GetMapId() == MAPID_INVALID)
+            leader->SetEntryPoint();
+
         lfg::LfgTeleportError error = lfg::LFG_TELEPORTERROR_OK;
 
-        if (!player->GetMap()->IsDungeon() || player->GetEntryPoint().GetMapId() == MAPID_INVALID)
-            player->SetEntryPoint();
+        if (leader->GetMapId() != mapid)
+            if (!leader->TeleportTo(mapid, x, y, z, orientation, 0, nullptr, mapid == leader->GetMapId()))
+                error = lfg::LFG_TELEPORTERROR_INVALID_LOCATION;
 
-        if (!player->TeleportTo(mapid, x, y, z, orientation, 0, nullptr, mapid == player->GetMapId()))
-            error = lfg::LFG_TELEPORTERROR_INVALID_LOCATION;
-        
-        return error;
+        Group* group = leader->GetGroup();
+
+        if (!group)
+            return error;
+
+        ObjectGuid leaderid = group->GetLeaderGUID();
+
+        for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+        {
+            if (Player* player = itr->GetSource())
+            {
+                if (player->GetGUID() == leaderid || player->GetMapId() == mapid)
+                    continue;
+
+                if (!player->GetMap()->IsDungeon() || player->GetEntryPoint().GetMapId() == MAPID_INVALID)
+                    player->SetEntryPoint();
+
+                player->SetSummonPoint(mapid, x, y, z);
+
+                WorldPacket data(SMSG_SUMMON_REQUEST, 8 + 4 + 4);
+                data << leaderid;
+                data << zoneid;
+                data << uint32(MAX_PLAYER_SUMMON_DELAY * IN_MILLISECONDS);
+                player->GetSession()->SendPacket(&data);
+            }
+        }
+
+        return lfg::LFG_TELEPORTERROR_OK;
     }
 };
 
