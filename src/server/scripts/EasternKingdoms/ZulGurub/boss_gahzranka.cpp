@@ -32,12 +32,8 @@ enum Spells
     SPELL_FROSTBREATH               = 16099,
     SPELL_MASSIVEGEYSER             = 22421,
     SPELL_SLAM                      = 24326,
-<<<<<<< HEAD
-    SPELL_THRASH                    = 3417 // Triggers 3391
-=======
     SPELL_THRASH                    = 3417, // Triggers 3391
     SPELL_SPLASH                    = 24593
->>>>>>> 6ffb8aae6eaf46b7b9124564dfb8226baad61342
 };
 
 enum Events
@@ -47,14 +43,11 @@ enum Events
     EVENT_SLAM                      = 3
 };
 
-<<<<<<< HEAD
-=======
 enum Misc
 {
     GAMEOBJECT_MUDSKUNK_LURE        = 180346
 };
 
->>>>>>> 6ffb8aae6eaf46b7b9124564dfb8226baad61342
 class boss_gahzranka : public CreatureScript
 {
 public:
@@ -165,8 +158,6 @@ private:
     bool _wipeThreat = false;
 };
 
-<<<<<<< HEAD
-=======
 class spell_pagles_point_cast : public SpellScript
 {
     PrepareSpellScript(spell_pagles_point_cast);
@@ -203,13 +194,9 @@ class spell_pagles_point_cast : public SpellScript
     }
 };
 
->>>>>>> 6ffb8aae6eaf46b7b9124564dfb8226baad61342
 void AddSC_boss_gahzranka()
 {
     new boss_gahzranka();
     RegisterSpellScript(spell_gahzranka_slam);
-<<<<<<< HEAD
-=======
     RegisterSpellScript(spell_pagles_point_cast);
->>>>>>> 6ffb8aae6eaf46b7b9124564dfb8226baad61342
 }
