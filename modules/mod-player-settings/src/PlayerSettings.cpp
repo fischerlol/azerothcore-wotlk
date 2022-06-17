@@ -9,6 +9,7 @@
 #include "Formulas.h"
 #include "Group.h"
 #include "DBUpdater.h"
+#include "ItemTemplate.h"
 #include <algorithm>
 #include <cstdlib>
 #include <vector>
@@ -115,7 +116,7 @@ public:
             return;
 
         if (killed->IsDungeonBoss())
-            RewardHonor(player, killed);
+            rewardHonor(player, killed);
     }
 
     void OnCreatureKilledByPet(Player *owner, Creature *killed) override
@@ -127,7 +128,7 @@ public:
             return;
 
         if (killed->IsDungeonBoss())
-            RewardHonor(owner, killed);
+            rewardHonor(owner, killed);
     }
 
     void OnPlayerCompleteQuest(Player *player, Quest const *quest) override
@@ -193,8 +194,554 @@ public:
             player->RemoveAura(vaelastrasz);
     }
 
+    void OnCustomScalingStatValueBefore(Player* player, ItemTemplate const* proto, uint8 slot, bool apply, uint32& CustomScalingStatValue) override
+    {
+        uint32 ilvl = characterLevelToItemLevel(player->getLevel());
+
+        if (ilvl < proto->ItemLevel)
+            return;
+
+        uint32 subclass = proto->SubClass;
+        float multiplier;
+
+        switch (slot)
+        {
+            // Primary budget
+            case EQUIPMENT_SLOT_HEAD:
+            case EQUIPMENT_SLOT_BODY:
+            case EQUIPMENT_SLOT_CHEST:
+            case EQUIPMENT_SLOT_LEGS:
+                multiplier = primaryBudget(ilvl) / primaryBudget(proto->ItemLevel);
+                break;
+            // Secondary budget
+            case EQUIPMENT_SLOT_SHOULDERS:
+            case EQUIPMENT_SLOT_FEET:
+            case EQUIPMENT_SLOT_HANDS:
+            case EQUIPMENT_SLOT_WAIST:
+            case EQUIPMENT_SLOT_TRINKET1:
+            case EQUIPMENT_SLOT_TRINKET2:
+                multiplier = secondaryBudget(ilvl) / secondaryBudget(proto->ItemLevel);
+                break;
+            // Tertiary budget
+            case EQUIPMENT_SLOT_WRISTS:
+            case EQUIPMENT_SLOT_FINGER1:
+            case EQUIPMENT_SLOT_FINGER2:
+            case EQUIPMENT_SLOT_BACK:
+                multiplier = tertiaryBudget(ilvl) / tertiaryBudget(proto->ItemLevel);
+                break;
+            // Weapon budget
+            case EQUIPMENT_SLOT_MAINHAND: // 2H and 1H
+            case EQUIPMENT_SLOT_OFFHAND:
+                switch (subclass)
+                {
+                    case ITEM_SUBCLASS_WEAPON_AXE:
+                    case ITEM_SUBCLASS_WEAPON_MACE:
+                    case ITEM_SUBCLASS_WEAPON_SWORD:
+                    case ITEM_SUBCLASS_WEAPON_FIST:
+                    case ITEM_SUBCLASS_WEAPON_DAGGER:
+                        multiplier = weaponBudget(ilvl) / weaponBudget(proto->ItemLevel);
+                        break;
+                    case ITEM_SUBCLASS_WEAPON_AXE2:
+                    case ITEM_SUBCLASS_WEAPON_MACE2:
+                    case ITEM_SUBCLASS_WEAPON_POLEARM:
+                    case ITEM_SUBCLASS_WEAPON_SWORD2:
+                    case ITEM_SUBCLASS_WEAPON_STAFF:
+                        multiplier = primaryBudget(ilvl) / primaryBudget(proto->ItemLevel);
+                        break;
+                }
+                break;
+            // Ranged (bows, guns, and crossbows) and tertiary budget (thrown and wands)
+            case EQUIPMENT_SLOT_RANGED:
+                switch (subclass)
+                {
+                    case ITEM_SUBCLASS_WEAPON_BOW:
+                    case ITEM_SUBCLASS_WEAPON_GUN:
+                    case ITEM_SUBCLASS_WEAPON_CROSSBOW:
+                        multiplier = rangedBudget(ilvl) / rangedBudget(proto->ItemLevel);
+                        break;
+                    case ITEM_SUBCLASS_WEAPON_THROWN:
+                    case ITEM_SUBCLASS_WEAPON_WAND:
+                        multiplier = tertiaryBudget(ilvl) / tertiaryBudget(proto->ItemLevel);
+                        break;
+                }
+
+                break;
+            default:
+                multiplier = 1;
+                break;
+        }
+
+        CustomScalingStatValue = 10000 * multiplier;
+
+        uint32 armor = proto->Armor;
+
+        if (armor)
+        {
+            switch (slot)
+            {
+                // Primary armor
+                case EQUIPMENT_SLOT_HEAD:
+                case EQUIPMENT_SLOT_BODY:
+                case EQUIPMENT_SLOT_CHEST:
+                case EQUIPMENT_SLOT_LEGS:
+                    switch (proto->SubClass)
+                    {
+                        case ITEM_SUBCLASS_ARMOR_CLOTH:
+                            armor = 1.47 * ilvl + 1.76;
+                            break;
+                        case ITEM_SUBCLASS_ARMOR_LEATHER:
+                            armor = 2.64 * ilvl + 21.1;
+                            break;
+                        case ITEM_SUBCLASS_ARMOR_MAIL:
+                            armor = 6.62 * ilvl + -61.2;
+                            break;
+                        case ITEM_SUBCLASS_ARMOR_PLATE:
+                            armor = 11.7 * ilvl + -86.6;
+                            break;
+                    }
+
+                    break;
+                // Secondary armor
+                case EQUIPMENT_SLOT_SHOULDERS:
+                case EQUIPMENT_SLOT_FEET:
+                case EQUIPMENT_SLOT_HANDS:
+                case EQUIPMENT_SLOT_WAIST:
+                case EQUIPMENT_SLOT_WRISTS:
+                    switch (proto->SubClass)
+                    {
+                        case ITEM_SUBCLASS_ARMOR_CLOTH:
+                            armor = 1.1 * ilvl + 1.32;
+                            break;
+                        case ITEM_SUBCLASS_ARMOR_LEATHER:
+                            armor = 1.98 * ilvl + 15.8;
+                            break;
+                        case ITEM_SUBCLASS_ARMOR_MAIL:
+                            armor = 4.97 * ilvl + -45.9;
+                            break;
+                        case ITEM_SUBCLASS_ARMOR_PLATE:
+                            armor = 8.74 * ilvl + -64.9;
+                            break;
+                    }
+
+                    break;
+                // Tertiary budget
+                case EQUIPMENT_SLOT_BACK:
+                    armor = 0.735 * ilvl + 0.872;
+                    break;
+                default:
+                    break;
+            }
+
+            UnitModifierType modType = TOTAL_VALUE;
+
+            if (proto->Class == ITEM_CLASS_ARMOR)
+            {
+                switch (proto->SubClass)
+                {
+                    case ITEM_SUBCLASS_ARMOR_CLOTH:
+                    case ITEM_SUBCLASS_ARMOR_LEATHER:
+                    case ITEM_SUBCLASS_ARMOR_MAIL:
+                    case ITEM_SUBCLASS_ARMOR_PLATE:
+                    case ITEM_SUBCLASS_ARMOR_SHIELD:
+                        modType = BASE_VALUE;
+                        break;
+                }
+            }
+
+            player->HandleStatModifier(UNIT_MOD_ARMOR, modType, float(armor), apply);
+        }
+
+        if (!apply)
+            armor = proto->Armor;
+
+        if (proto->ArmorDamageModifier > 0)
+            player->HandleStatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, float(proto->ArmorDamageModifier) * multiplier, apply);
+
+        if (proto->Block)
+            player->HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(proto->Block) * multiplier, apply);
+
+        if (proto->HolyRes)
+            player->HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->HolyRes) * multiplier, apply);
+
+        if (proto->FireRes)
+            player->HandleStatModifier(UNIT_MOD_RESISTANCE_FIRE, BASE_VALUE, float(proto->FireRes) * multiplier, apply);
+
+        if (proto->NatureRes)
+            player->HandleStatModifier(UNIT_MOD_RESISTANCE_NATURE, BASE_VALUE, float(proto->NatureRes) * multiplier, apply);
+
+        if (proto->FrostRes)
+            player->HandleStatModifier(UNIT_MOD_RESISTANCE_FROST, BASE_VALUE, float(proto->FrostRes) * multiplier, apply);
+
+        if (proto->ShadowRes)
+            player->HandleStatModifier(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(proto->ShadowRes) * multiplier, apply);
+
+        if (proto->ArcaneRes)
+            player->HandleStatModifier(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(proto->ArcaneRes) * multiplier, apply);
+
+        WeaponAttackType attType = BASE_ATTACK;
+
+        if (slot == EQUIPMENT_SLOT_RANGED && (
+                    proto->InventoryType == INVTYPE_RANGED || proto->InventoryType == INVTYPE_THROWN ||
+                    proto->InventoryType == INVTYPE_RANGEDRIGHT))
+        {
+            attType = RANGED_ATTACK;
+        }
+        else if (slot == EQUIPMENT_SLOT_OFFHAND)
+        {
+            attType = OFF_ATTACK;
+        }
+
+        if (player->CanUseAttackType(attType))
+        {
+            WeaponAttackType attType = BASE_ATTACK;
+            float damage = 0.0f;
+
+            if (slot == EQUIPMENT_SLOT_RANGED && (
+                        proto->InventoryType == INVTYPE_RANGED || proto->InventoryType == INVTYPE_THROWN ||
+                        proto->InventoryType == INVTYPE_RANGEDRIGHT))
+            {
+                attType = RANGED_ATTACK;
+            }
+            else if (slot == EQUIPMENT_SLOT_OFFHAND)
+            {
+                attType = OFF_ATTACK;
+            }
+
+            float dps = 0.0;
+
+            switch (slot)
+            {
+                case EQUIPMENT_SLOT_MAINHAND: // 2H and 1H
+                case EQUIPMENT_SLOT_OFFHAND:
+                    switch (subclass)
+                    {
+                        case ITEM_SUBCLASS_WEAPON_AXE:
+                        case ITEM_SUBCLASS_WEAPON_MACE:
+                        case ITEM_SUBCLASS_WEAPON_SWORD:
+                        case ITEM_SUBCLASS_WEAPON_FIST:
+                        case ITEM_SUBCLASS_WEAPON_DAGGER:
+                            if (proto->HasSpellPowerStat())
+                            {
+                                dps = spellcasterDPS1H(ilvl) / spellcasterDPS1H(proto->ItemLevel);
+                            }
+                            else
+                            {
+                                dps = weaponDPS1H(ilvl) / weaponDPS1H(proto->ItemLevel);
+                            }
+
+                            break;
+                        case ITEM_SUBCLASS_WEAPON_AXE2:
+                        case ITEM_SUBCLASS_WEAPON_MACE2:
+                        case ITEM_SUBCLASS_WEAPON_POLEARM:
+                        case ITEM_SUBCLASS_WEAPON_SWORD2:
+                        case ITEM_SUBCLASS_WEAPON_STAFF:
+                            if (proto->HasSpellPowerStat())
+                            {
+                                dps = spellcasterDPS2H(ilvl) / spellcasterDPS2H(proto->ItemLevel);
+                            }
+                            else
+                            {
+                                dps = weaponDPS2H(ilvl) / weaponDPS2H(proto->ItemLevel);
+                            }
+                            break;
+                    }
+                    break;
+                // Ranged (bows, guns, and crossbows) and tertiary budget (thrown and wands)
+                case EQUIPMENT_SLOT_RANGED:
+                    switch (subclass)
+                    {
+                        case ITEM_SUBCLASS_WEAPON_BOW:
+                        case ITEM_SUBCLASS_WEAPON_GUN:
+                        case ITEM_SUBCLASS_WEAPON_CROSSBOW:
+                        case ITEM_SUBCLASS_WEAPON_THROWN:
+                            dps = rangedDPS(ilvl) / rangedDPS(proto->ItemLevel);
+                            break;
+                        case ITEM_SUBCLASS_WEAPON_WAND:
+                            dps = wandDPS(ilvl) / wandDPS(proto->ItemLevel);
+                            break;
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+
+            float average = dps * proto->Delay / 1000.0f;
+            float minDamage = 0.7f * average;
+            float maxDamage = 1.3f * average;
+
+            if (minDamage > 0)
+            {
+                damage = apply ? minDamage : BASE_MINDAMAGE;
+                player->SetBaseWeaponDamage(attType, MINDAMAGE, damage);
+            }
+
+            if (maxDamage  > 0)
+            {
+                damage = apply ? maxDamage : BASE_MAXDAMAGE;
+                player->SetBaseWeaponDamage(attType, MAXDAMAGE, damage);
+            }
+
+            if (proto->Delay && !player->IsInFeralForm())
+            {
+                if (slot == EQUIPMENT_SLOT_RANGED)
+                    player->SetAttackTime(RANGED_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
+                else if (slot == EQUIPMENT_SLOT_MAINHAND)
+                    player->SetAttackTime(BASE_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
+                else if (slot == EQUIPMENT_SLOT_OFFHAND)
+                    player->SetAttackTime(OFF_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
+            }
+
+            if (player->IsInFeralForm() && player->CanModifyStats() && (damage || proto->Delay))
+                player->UpdateDamagePhysical(attType);
+
+            updatePlayerCache(player, proto, multiplier, armor, minDamage, maxDamage);
+        }
+
+        if (player->getClass() == CLASS_DRUID)
+        {
+            int32 dpsMod = 0;
+            int32 feralBonus = 0;
+
+            feralBonus += proto->getFeralBonus(dpsMod) * multiplier;
+
+            if (feralBonus)
+                player->ApplyFeralAPBonus(feralBonus, apply);
+        }
+    }
+
+    void OnCustomScalingStatValue(Player* /*player*/, ItemTemplate const* /*proto*/, uint32& /*statType*/, int32& val, uint8 /*itemProtoStatNumber*/, uint32 ScalingStatValue, ScalingStatValuesEntry const* /*ssv*/) override
+    {
+        float multiplier = ScalingStatValue / 10000.0f;
+        val *= multiplier;
+    }
+
 private:
-    void RewardHonor(Player *killer, Creature *killed)
+    static float characterLevelToItemLevel(uint32 level)
+    {
+        if (level < 61)
+            return 1 * level + 4.93;
+
+        if (level < 71)
+            return 3 * level + -95;
+
+        return 4 * level + -133;
+    }
+
+    static float primaryBudget(uint32 ilvl)
+    {
+        return 1.33 + 0.469 * ilvl + 1.05E-03 * pow(ilvl, 2);
+    }
+
+    static float secondaryBudget(uint32 ilvl)
+    {
+        return 0.845 + 0.36 * ilvl + 7.23E-04 * pow(ilvl, 2);
+    }
+
+    static float tertiaryBudget(uint32 ilvl)
+    {
+        return 0.597 + 0.27 * ilvl + 5.42E-04 * pow(ilvl, 2);
+    }
+
+    static float trinketBudget(uint32 ilvl)
+    {
+        return 0.845 + 0.36 * ilvl + 7.23E-04 * pow(ilvl, 2);
+    }
+
+    static float weaponBudget(uint32 ilvl)
+    {
+        return 0.523 + 0.2 * ilvl + 4.56E-04 * pow(ilvl, 2);
+    }
+
+    static float rangedBudget(uint32 ilvl)
+    {
+        return 0.435 + 0.149 * ilvl + 3.16E-04 * pow(ilvl, 2);
+    }
+
+    static float weaponDPS1H(uint32 ilvl)
+    {
+        return 0.631 * ilvl + 0.74;
+    }
+
+    static float weaponDPS2H(uint32 ilvl)
+    {
+        return 0.819 * ilvl + 1.13;
+    }
+
+    static float spellcasterDPS1H(uint32 ilvl)
+    {
+        return 0.445 * ilvl + 7.08;
+    }
+
+    static float spellcasterDPS2H(uint32 ilvl)
+    {
+        return 0.577 * ilvl + 9.41;
+    }
+    
+    static float rangedDPS(uint32 ilvl)
+    {
+        return 0.561 * ilvl + 3.02;
+    }
+
+    static float wandDPS(uint32 ilvl)
+    {
+        return 1.2 * ilvl + -7.4;
+    }
+
+    void updatePlayerCache(Player* player, ItemTemplate const* proto, float multiplier, uint32 armor, float mindamage, float maxdamage)
+    {
+        std::string Name = proto->Name1;
+        std::string Description = proto->Description;
+
+        int loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
+
+        if (loc_idx >= 0)
+        {
+            if (ItemLocale const* il = sObjectMgr->GetItemLocale(proto->ItemId))
+            {
+                ObjectMgr::GetLocaleString(il->Name, loc_idx, Name);
+                ObjectMgr::GetLocaleString(il->Description, loc_idx, Description);
+            }
+        }
+
+        // guess size
+        WorldPacket data(SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600);
+
+        data << proto->ItemId;
+        data << proto->Class;
+        data << proto->SubClass;
+        data << proto->SoundOverrideSubclass;
+        data << Name;
+        data << uint8(0x00);                                //proto->Name2; // blizz not send name there, just uint8(0x00); <-- \0 = empty string = empty name...
+        data << uint8(0x00);                                //proto->Name3; // blizz not send name there, just uint8(0x00);
+        data << uint8(0x00);                                //proto->Name4; // blizz not send name there, just uint8(0x00);
+        data << proto->DisplayInfoID;
+        data << proto->Quality;
+        data << proto->Flags;
+        data << proto->Flags2;
+        data << proto->BuyPrice;
+        data << proto->SellPrice;
+        data << proto->InventoryType;
+        data << proto->AllowableClass;
+        data << proto->AllowableRace;
+        data << proto->ItemLevel;
+        data << proto->RequiredLevel;
+        data << proto->RequiredSkill;
+        data << proto->RequiredSkillRank;
+        data << proto->RequiredSpell;
+        data << proto->RequiredHonorRank;
+        data << proto->RequiredCityRank;
+        data << proto->RequiredReputationFaction;
+        data << proto->RequiredReputationRank;
+        data << int32(proto->MaxCount);
+        data << int32(proto->Stackable);
+        data << proto->ContainerSlots;
+        data << proto->StatsCount;                         // item stats count
+
+        for (uint32 i = 0; i < proto->StatsCount; ++i)
+        {
+            data << proto->ItemStat[i].ItemStatType;
+            data << uint32(proto->ItemStat[i].ItemStatValue * multiplier);
+        }
+
+        data << proto->ScalingStatDistribution;            // scaling stats distribution
+        data << proto->ScalingStatValue;                   // some kind of flags used to determine stat values column
+
+        for (int i = 0; i < MAX_ITEM_PROTO_DAMAGES; ++i)
+        {
+            data << uint32(mindamage);
+            data << uint32(maxdamage);
+            data << proto->Damage[i].DamageType;
+        }
+
+        // resistances (7)
+        data << armor;
+        data << proto->HolyRes * multiplier;
+        data << proto->FireRes * multiplier;
+        data << proto->NatureRes * multiplier;
+        data << proto->FrostRes * multiplier;
+        data << proto->ShadowRes * multiplier;
+        data << proto->ArcaneRes * multiplier;
+
+        data << proto->Delay;
+        data << proto->AmmoType;
+        data << proto->RangedModRange;
+
+        for (int s = 0; s < MAX_ITEM_PROTO_SPELLS; ++s)
+        {
+            // send DBC data for cooldowns in same way as it used in Spell::SendSpellCooldown
+            // use `item_template` or if not set then only use spell cooldowns
+            SpellInfo const* spell = sSpellMgr->GetSpellInfo(proto->Spells[s].SpellId);
+
+            if (spell)
+            {
+                bool db_data = proto->Spells[s].SpellCooldown >= 0 || proto->Spells[s].SpellCategoryCooldown >= 0;
+
+                data << proto->Spells[s].SpellId;
+                data << proto->Spells[s].SpellTrigger;
+                data << int32(proto->Spells[s].SpellCharges);
+
+                if (db_data)
+                {
+                    data << uint32(proto->Spells[s].SpellCooldown);
+                    data << uint32(proto->Spells[s].SpellCategory);
+                    data << uint32(proto->Spells[s].SpellCategoryCooldown);
+                }
+                else
+                {
+                    data << uint32(spell->RecoveryTime);
+                    data << uint32(spell->GetCategory());
+                    data << uint32(spell->CategoryRecoveryTime);
+                }
+            }
+            else
+            {
+                data << uint32(0);
+                data << uint32(0);
+                data << uint32(0);
+                data << uint32(-1);
+                data << uint32(0);
+                data << uint32(-1);
+            }
+        }
+
+        data << proto->Bonding;
+        data << Description;
+        data << proto->PageText;
+        data << proto->LanguageID;
+        data << proto->PageMaterial;
+        data << proto->StartQuest;
+        data << proto->LockID;
+        data << int32(proto->Material);
+        data << proto->Sheath;
+        data << proto->RandomProperty;
+        data << proto->RandomSuffix;
+        data << proto->Block;
+        data << proto->ItemSet;
+        data << proto->MaxDurability;
+        data << proto->Area;
+        data << proto->Map;                                // Added in 1.12.x & 2.0.1 client branch
+        data << proto->BagFamily;
+        data << proto->TotemCategory;
+
+        for (int s = 0; s < MAX_ITEM_PROTO_SOCKETS; ++s)
+        {
+            data << proto->Socket[s].Color;
+            data << proto->Socket[s].Content;
+        }
+
+        data << proto->socketBonus;
+        data << proto->GemProperties;
+        data << proto->RequiredDisenchantSkill;
+        data << proto->ArmorDamageModifier;
+        data << proto->Duration;                           // added in 2.4.2.8209, duration (seconds)
+        data << proto->ItemLimitCategory;                  // WotLK, ItemLimitCategory
+        data << proto->HolidayId;                          // Holiday.dbc?
+
+        player->GetSession()->SendPacket(&data);
+    }
+
+    void rewardHonor(Player *killer, Creature *killed)
     {
         Map *map = killer->GetMap();
 
@@ -227,7 +774,7 @@ private:
                             ChatHandler(player->GetSession()).PSendSysMessage("You have been awarded %i honor.", honor);
                             uint32 guid = player->GetGUID().GetCounter();
                             mapInfo->honor[guid] += honor;
-                            RewardBonusHonor(player, mapInfo->honor[guid]);
+                            rewardBonusHonor(player, mapInfo->honor[guid]);
                         }
                     }
                 }
@@ -235,7 +782,7 @@ private:
         }
     }
 
-    void RewardBonusHonor(Player *player, float honor_f)
+    void rewardBonusHonor(Player *player, float honor_f)
     {
         uint32 guid = player->GetGUID().GetCounter();
         Map *map = player->GetMap();
