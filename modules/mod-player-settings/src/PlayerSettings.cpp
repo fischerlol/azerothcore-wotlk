@@ -197,10 +197,6 @@ public:
     void OnCustomScalingStatValueBefore(Player* player, ItemTemplate const* proto, uint8 slot, bool apply, uint32& CustomScalingStatValue) override
     {
         uint32 ilvl = characterLevelToItemLevel(player->getLevel());
-
-        if (ilvl < proto->ItemLevel)
-            return;
-
         uint32 subclass = proto->SubClass;
         float multiplier;
 
@@ -271,12 +267,27 @@ public:
                 break;
         }
 
-        CustomScalingStatValue = 10000 * multiplier;
-
         uint32 armor = proto->Armor;
 
         if (armor)
         {
+            UnitModifierType modType = TOTAL_VALUE;
+
+            if (proto->Class == ITEM_CLASS_ARMOR)
+            {
+                switch (proto->SubClass)
+                {
+                    case ITEM_SUBCLASS_ARMOR_CLOTH:
+                    case ITEM_SUBCLASS_ARMOR_LEATHER:
+                    case ITEM_SUBCLASS_ARMOR_MAIL:
+                    case ITEM_SUBCLASS_ARMOR_PLATE:
+                    // Have to find scaling values for shield armor.
+                    case ITEM_SUBCLASS_ARMOR_SHIELD:
+                        modType = BASE_VALUE;
+                        break;
+                }
+            }
+
             switch (slot)
             {
                 // Primary armor
@@ -332,27 +343,8 @@ public:
                     break;
             }
 
-            UnitModifierType modType = TOTAL_VALUE;
-
-            if (proto->Class == ITEM_CLASS_ARMOR)
-            {
-                switch (proto->SubClass)
-                {
-                    case ITEM_SUBCLASS_ARMOR_CLOTH:
-                    case ITEM_SUBCLASS_ARMOR_LEATHER:
-                    case ITEM_SUBCLASS_ARMOR_MAIL:
-                    case ITEM_SUBCLASS_ARMOR_PLATE:
-                    case ITEM_SUBCLASS_ARMOR_SHIELD:
-                        modType = BASE_VALUE;
-                        break;
-                }
-            }
-
             player->HandleStatModifier(UNIT_MOD_ARMOR, modType, float(armor), apply);
         }
-
-        if (!apply)
-            armor = proto->Armor;
 
         if (proto->ArmorDamageModifier > 0)
             player->HandleStatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, float(proto->ArmorDamageModifier) * multiplier, apply);
@@ -380,34 +372,15 @@ public:
 
         WeaponAttackType attType = BASE_ATTACK;
 
-        if (slot == EQUIPMENT_SLOT_RANGED && (
-                    proto->InventoryType == INVTYPE_RANGED || proto->InventoryType == INVTYPE_THROWN ||
-                    proto->InventoryType == INVTYPE_RANGEDRIGHT))
-        {
+        if (slot == EQUIPMENT_SLOT_RANGED && isInventoryTypeRanged(proto))
             attType = RANGED_ATTACK;
-        }
         else if (slot == EQUIPMENT_SLOT_OFFHAND)
-        {
             attType = OFF_ATTACK;
-        }
 
         if (player->CanUseAttackType(attType))
         {
-            WeaponAttackType attType = BASE_ATTACK;
-            float damage = 0.0f;
-
-            if (slot == EQUIPMENT_SLOT_RANGED && (
-                        proto->InventoryType == INVTYPE_RANGED || proto->InventoryType == INVTYPE_THROWN ||
-                        proto->InventoryType == INVTYPE_RANGEDRIGHT))
-            {
-                attType = RANGED_ATTACK;
-            }
-            else if (slot == EQUIPMENT_SLOT_OFFHAND)
-            {
-                attType = OFF_ATTACK;
-            }
-
-            float dps = 0.0;
+            float dps = 0.0f;
+            float protoDps = 0.0f;
 
             switch (slot)
             {
@@ -422,11 +395,13 @@ public:
                         case ITEM_SUBCLASS_WEAPON_DAGGER:
                             if (proto->HasSpellPowerStat())
                             {
-                                dps = spellcasterDPS1H(ilvl) / spellcasterDPS1H(proto->ItemLevel);
+                                dps = spellcasterDPS1H(ilvl);
+                                protoDps = spellcasterDPS1H(proto->ItemLevel);
                             }
                             else
                             {
-                                dps = weaponDPS1H(ilvl) / weaponDPS1H(proto->ItemLevel);
+                                dps = weaponDPS1H(ilvl);
+                                protoDps = weaponDPS1H(proto->ItemLevel);
                             }
 
                             break;
@@ -437,12 +412,15 @@ public:
                         case ITEM_SUBCLASS_WEAPON_STAFF:
                             if (proto->HasSpellPowerStat())
                             {
-                                dps = spellcasterDPS2H(ilvl) / spellcasterDPS2H(proto->ItemLevel);
+                                dps = spellcasterDPS2H(ilvl);
+                                protoDps = spellcasterDPS2H(proto->ItemLevel);
                             }
                             else
                             {
-                                dps = weaponDPS2H(ilvl) / weaponDPS2H(proto->ItemLevel);
+                                dps = weaponDPS2H(ilvl);
+                                protoDps = weaponDPS2H(proto->ItemLevel);
                             }
+
                             break;
                     }
                     break;
@@ -454,10 +432,12 @@ public:
                         case ITEM_SUBCLASS_WEAPON_GUN:
                         case ITEM_SUBCLASS_WEAPON_CROSSBOW:
                         case ITEM_SUBCLASS_WEAPON_THROWN:
-                            dps = rangedDPS(ilvl) / rangedDPS(proto->ItemLevel);
+                            dps = rangedDPS(ilvl);
+                            protoDps = rangedDPS(proto->ItemLevel);
                             break;
                         case ITEM_SUBCLASS_WEAPON_WAND:
-                            dps = wandDPS(ilvl) / wandDPS(proto->ItemLevel);
+                            dps = wandDPS(ilvl);
+                            protoDps = wandDPS(proto->ItemLevel);
                             break;
                     }
 
@@ -469,6 +449,7 @@ public:
             float average = dps * proto->Delay / 1000.0f;
             float minDamage = 0.7f * average;
             float maxDamage = 1.3f * average;
+            float damage = 0.0;
 
             if (minDamage > 0)
             {
@@ -492,10 +473,21 @@ public:
                     player->SetAttackTime(OFF_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
             }
 
-            if (player->IsInFeralForm() && player->CanModifyStats() && (damage || proto->Delay))
+            if (player->CanModifyStats() && (damage || proto->Delay) && !player->IsInFeralForm())
                 player->UpdateDamagePhysical(attType);
 
-            updatePlayerCache(player, proto, multiplier, armor, minDamage, maxDamage);
+            _Damage damages[MAX_ITEM_PROTO_DAMAGES];
+
+            for (int i = 0; i < MAX_ITEM_PROTO_DAMAGES; i++)
+            {
+                damages[i] = proto->Damage[i];
+            }
+
+            // Need to find scaling values for secondary weapon damage.
+            damages[0].DamageMin = minDamage;
+            damages[0].DamageMax = maxDamage;
+
+            updatePlayerCache(player, proto, multiplier, armor, damages);
         }
 
         if (player->getClass() == CLASS_DRUID)
@@ -508,6 +500,8 @@ public:
             if (feralBonus)
                 player->ApplyFeralAPBonus(feralBonus, apply);
         }
+
+        CustomScalingStatValue = 10000 * multiplier;
     }
 
     void OnCustomScalingStatValue(Player* /*player*/, ItemTemplate const* /*proto*/, uint32& /*statType*/, int32& val, uint8 /*itemProtoStatNumber*/, uint32 ScalingStatValue, ScalingStatValuesEntry const* /*ssv*/) override
@@ -588,7 +582,12 @@ private:
         return 1.2 * ilvl + -7.4;
     }
 
-    void updatePlayerCache(Player* player, ItemTemplate const* proto, float multiplier, uint32 armor, float mindamage, float maxdamage)
+    static bool isInventoryTypeRanged(ItemTemplate const* proto)
+    {
+        return proto->InventoryType == INVTYPE_RANGED || proto->InventoryType == INVTYPE_THROWN || proto->InventoryType == INVTYPE_RANGEDRIGHT;
+    }
+
+    void updatePlayerCache(Player* player, ItemTemplate const* proto, float statMultiplier, uint32 armor, _Damage damages[MAX_ITEM_PROTO_DAMAGES])
     {
         std::string Name = proto->Name1;
         std::string Description = proto->Description;
@@ -641,7 +640,7 @@ private:
         for (uint32 i = 0; i < proto->StatsCount; ++i)
         {
             data << proto->ItemStat[i].ItemStatType;
-            data << uint32(proto->ItemStat[i].ItemStatValue * multiplier);
+            data << uint32(proto->ItemStat[i].ItemStatValue * statMultiplier);
         }
 
         data << proto->ScalingStatDistribution;            // scaling stats distribution
@@ -649,19 +648,19 @@ private:
 
         for (int i = 0; i < MAX_ITEM_PROTO_DAMAGES; ++i)
         {
-            data << uint32(mindamage);
-            data << uint32(maxdamage);
-            data << proto->Damage[i].DamageType;
+            data << damages[i].DamageMin;
+            data << damages[i].DamageMax;
+            data << damages[i].DamageType;
         }
 
         // resistances (7)
         data << armor;
-        data << proto->HolyRes * multiplier;
-        data << proto->FireRes * multiplier;
-        data << proto->NatureRes * multiplier;
-        data << proto->FrostRes * multiplier;
-        data << proto->ShadowRes * multiplier;
-        data << proto->ArcaneRes * multiplier;
+        data << proto->HolyRes * statMultiplier;
+        data << proto->FireRes * statMultiplier;
+        data << proto->NatureRes * statMultiplier;
+        data << proto->FrostRes * statMultiplier;
+        data << proto->ShadowRes * statMultiplier;
+        data << proto->ArcaneRes * statMultiplier;
 
         data << proto->Delay;
         data << proto->AmmoType;
