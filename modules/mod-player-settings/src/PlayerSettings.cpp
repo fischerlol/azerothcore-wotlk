@@ -10,6 +10,7 @@
 #include "Group.h"
 #include "DBUpdater.h"
 #include "ItemTemplate.h"
+#include "Spell.h"
 #include <algorithm>
 #include <cstdlib>
 #include <vector>
@@ -42,7 +43,6 @@ class PlayerSettingsMapInfo : public DataMap::Base
 {
 public:
     PlayerSettingsMapInfo() {}
-    bool isLfgGroup = false;
     uint32 nplayers = 0;
     uint32 veto = 0;
     std::map<uint32, float> honor;
@@ -216,6 +216,50 @@ public:
         CharacterDatabase.CommitTransaction(trans);
     }
 
+    void OnCreateItem(Player* player, Item* item, uint32 /*count*/) override
+    {
+        ItemTemplate const *proto = sObjectMgr->GetItemTemplate(item->GetEntry());
+
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+
+        uint32 ilvl = getItemLevel(player, proto);
+
+        if (ilvl)
+        {
+
+            CharacterDatabase.Execute("UPDATE item_level SET ilvl = {} WHERE player = {} AND item = {}", ilvl, player->GetGUID().GetCounter(), proto->ItemId);
+        }
+        else
+        {
+            ilvl = characterLevelToItemLevel(player->getLevel());
+            CharacterDatabase.Execute("INSERT INTO item_level (player, item, ilvl) VALUES ({}, {}, {})", player->GetGUID().GetCounter(), proto->ItemId, ilvl);
+        }
+
+        CharacterDatabase.CommitTransaction(trans);
+    }
+
+    void OnQuestRewardItem(Player* player, Item* item, uint32 /*count*/) override
+    {
+        ItemTemplate const *proto = sObjectMgr->GetItemTemplate(item->GetEntry());
+
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+
+        uint32 ilvl = getItemLevel(player, proto);
+
+        if (ilvl)
+        {
+
+            CharacterDatabase.Execute("UPDATE item_level SET ilvl = {} WHERE player = {} AND item = {}", ilvl, player->GetGUID().GetCounter(), proto->ItemId);
+        }
+        else
+        {
+            ilvl = characterLevelToItemLevel(player->getLevel());
+            CharacterDatabase.Execute("INSERT INTO item_level (player, item, ilvl) VALUES ({}, {}, {})", player->GetGUID().GetCounter(), proto->ItemId, ilvl);
+        }
+
+        CharacterDatabase.CommitTransaction(trans);
+    }
+
     void OnCustomScalingStatValueBefore(Player* player, ItemTemplate const* proto, uint8 slot, bool apply, uint32& CustomScalingStatValue) override
     {
         uint32 ilvl = getItemLevel(player, proto);
@@ -238,59 +282,6 @@ public:
         float multiplier = ScalingStatValue / 10000.0f;
         val *= multiplier;
     }
-
-    bool CanCastItemCombatSpell(Player* player, Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 /*procEx*/, Item* item, ItemTemplate const* proto) override
-    {
-        if (procVictim & PROC_FLAG_TAKEN_DAMAGE)
-        {
-            for (uint8 i = 0; i < MAX_ITEM_SPELLS; ++i)
-            {
-                _Spell const& spellData = proto->Spells[i];
-
-                if (!spellData.SpellId)
-                    continue;
-
-                if (spellData.SpellTrigger != ITEM_SPELLTRIGGER_CHANCE_ON_HIT)
-                    continue;
-
-                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellData.SpellId);
-                if (!spellInfo)
-                {
-                    LOG_ERROR("entities.player", "WORLD: unknown Item spellid {}", spellData.SpellId);
-                    continue;
-                }
-
-                float chance = (float)spellInfo->ProcChance;
-
-                if (spellData.SpellPPMRate)
-                {
-                    uint32 WeaponSpeed = player->GetAttackTime(attType);
-                    chance = player->GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate, spellInfo);
-                }
-                else if (chance > 100.0f)
-                {
-                    chance = player->GetWeaponProcChance();
-                }
-
-                if (roll_chance_f(chance) && sScriptMgr->OnCastItemCombatSpell(player, target, spellInfo, item))
-                {
-                    uint32 ilvl = getItemLevel(player, proto);
-                    uint32 multiplier = getStatMultiplier(item->GetSlot(), ilvl, proto);
-
-                    for (uint32 i = 0; i < multiplier; i++)
-                        player->CastSpell(target, spellInfo->Id, TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD), item);
-                }
-            }
-
-            return false;
-        }
-
-        return true;
-    }
-
-    /*bool CanCastItemUseSpell(Player* player, Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex)
-    {
-    }*/
 
 private:
     static float characterLevelToItemLevel(uint32 level)
@@ -984,7 +975,7 @@ private:
         if (!isAttackerPlayer && !isPet)
             multiplier = defence + (1 - defence) / (maxPlayers - 1) * (nplayers - 1);
 
-        if (!instanceMap->IsRaidOrHeroicDungeon() && mapInfo->isLfgGroup)
+        if (!instanceMap->IsRaidOrHeroicDungeon())
         {
             if (!isAttackerPlayer && isTargetPlayer)
                 multiplier = multiplier * playerCurve(target->getLevel()) / playerCurve(attacker->getLevel());
@@ -1027,11 +1018,6 @@ public:
 
         if (mapInfo->veto == 0)
             mapInfo->veto = mapInfo->nplayers;
-
-        Group* group = player->GetGroup();
-
-        if (group)
-            mapInfo->isLfgGroup = sLFGMgr->IsLfgGroup(group->GetGUID());
 
         if (map->GetEntry()->IsDungeon() && player)
         {
