@@ -18,7 +18,7 @@ public:
 
     bool CanJoinLfg(Player* player, uint8 /*roles*/, lfg::LfgDungeonSet& dungeons, const std::string& /*comment*/) override
     {
-        if (isRaidBrowser(player) || isRandomDungeon(dungeons) || isLFGGroup(player))
+        if (isRaidBrowser(player) || isRandomDungeon(dungeons))
             return true;
 
         uint32 dungeonId = randomDungeon(dungeons);

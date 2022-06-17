@@ -194,12 +194,204 @@ public:
             player->RemoveAura(vaelastrasz);
     }
 
+    void OnLootItem(Player* player, Item* item, uint32 /*count*/, ObjectGuid /*lootguid*/) override
+    {
+        ItemTemplate const *proto = sObjectMgr->GetItemTemplate(item->GetEntry());
+
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+
+        uint32 ilvl = getItemLevel(player, proto);
+
+        if (ilvl)
+        {
+
+            CharacterDatabase.Execute("UPDATE item_level SET ilvl = {} WHERE player = {} AND item = {}", ilvl, player->GetGUID().GetCounter(), proto->ItemId);
+        }
+        else
+        {
+            ilvl = characterLevelToItemLevel(player->getLevel());
+            CharacterDatabase.Execute("INSERT INTO item_level (player, item, ilvl) VALUES ({}, {}, {})", player->GetGUID().GetCounter(), proto->ItemId, ilvl);
+        }
+
+        CharacterDatabase.CommitTransaction(trans);
+    }
+
     void OnCustomScalingStatValueBefore(Player* player, ItemTemplate const* proto, uint8 slot, bool apply, uint32& CustomScalingStatValue) override
     {
-        uint32 ilvl = characterLevelToItemLevel(player->getLevel());
-        uint32 subclass = proto->SubClass;
-        float multiplier;
+        uint32 ilvl = getItemLevel(player, proto);
 
+        if (!ilvl || ilvl < proto->ItemLevel)
+            return;
+
+        float multiplier = getStatMultiplier(slot, ilvl, proto);
+        uint32 armor = handleArmor(player, proto, slot, ilvl, multiplier, apply);
+        _Damage damages[MAX_ITEM_PROTO_DAMAGES];
+        handleWeaponDamage(player, proto, damages, slot, ilvl, apply);
+
+        applyFeralAPBonus(player, proto, multiplier, apply);
+        updatePlayerCache(player, proto, multiplier, armor, damages);
+        CustomScalingStatValue = 10000 * multiplier;
+    }
+
+    void OnCustomScalingStatValue(Player* /*player*/, ItemTemplate const* /*proto*/, uint32& /*statType*/, int32& val, uint8 /*itemProtoStatNumber*/, uint32 ScalingStatValue, ScalingStatValuesEntry const* /*ssv*/) override
+    {
+        float multiplier = ScalingStatValue / 10000.0f;
+        val *= multiplier;
+    }
+
+    bool CanCastItemCombatSpell(Player* player, Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 /*procEx*/, Item* item, ItemTemplate const* proto) override
+    {
+        if (procVictim & PROC_FLAG_TAKEN_DAMAGE)
+        {
+            for (uint8 i = 0; i < MAX_ITEM_SPELLS; ++i)
+            {
+                _Spell const& spellData = proto->Spells[i];
+
+                if (!spellData.SpellId)
+                    continue;
+
+                if (spellData.SpellTrigger != ITEM_SPELLTRIGGER_CHANCE_ON_HIT)
+                    continue;
+
+                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellData.SpellId);
+                if (!spellInfo)
+                {
+                    LOG_ERROR("entities.player", "WORLD: unknown Item spellid {}", spellData.SpellId);
+                    continue;
+                }
+
+                float chance = (float)spellInfo->ProcChance;
+
+                if (spellData.SpellPPMRate)
+                {
+                    uint32 WeaponSpeed = player->GetAttackTime(attType);
+                    chance = player->GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate, spellInfo);
+                }
+                else if (chance > 100.0f)
+                {
+                    chance = player->GetWeaponProcChance();
+                }
+
+                if (roll_chance_f(chance) && sScriptMgr->OnCastItemCombatSpell(player, target, spellInfo, item))
+                {
+                    uint32 ilvl = getItemLevel(player, proto);
+                    uint32 multiplier = getStatMultiplier(item->GetSlot(), ilvl, proto);
+
+                    for (uint32 i = 0; i < multiplier; i++)
+                        player->CastSpell(target, spellInfo->Id, TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD), item);
+                }
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /*bool CanCastItemUseSpell(Player* player, Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex)
+    {
+    }*/
+
+private:
+    static float characterLevelToItemLevel(uint32 level)
+    {
+        if (level < 61)
+            return 1 * level + 4.93;
+
+        if (level < 71)
+            return 3 * level + -95;
+
+        return 4 * level + -133;
+    }
+
+    static float primaryBudget(uint32 ilvl)
+    {
+        return 1.33 + 0.469 * ilvl + 1.05E-03 * pow(ilvl, 2);
+    }
+
+    static float secondaryBudget(uint32 ilvl)
+    {
+        return 0.845 + 0.36 * ilvl + 7.23E-04 * pow(ilvl, 2);
+    }
+
+    static float tertiaryBudget(uint32 ilvl)
+    {
+        return 0.597 + 0.27 * ilvl + 5.42E-04 * pow(ilvl, 2);
+    }
+
+    static float trinketBudget(uint32 ilvl)
+    {
+        return 0.845 + 0.36 * ilvl + 7.23E-04 * pow(ilvl, 2);
+    }
+
+    static float weaponBudget(uint32 ilvl)
+    {
+        return 0.523 + 0.2 * ilvl + 4.56E-04 * pow(ilvl, 2);
+    }
+
+    static float rangedBudget(uint32 ilvl)
+    {
+        return 0.435 + 0.149 * ilvl + 3.16E-04 * pow(ilvl, 2);
+    }
+
+    static float weaponDPS1H(uint32 ilvl)
+    {
+        return 0.631 * ilvl + 0.74;
+    }
+
+    static float weaponDPS2H(uint32 ilvl)
+    {
+        return 0.819 * ilvl + 1.13;
+    }
+
+    static float spellcasterDPS1H(uint32 ilvl)
+    {
+        return 0.445 * ilvl + 7.08;
+    }
+
+    static float spellcasterDPS2H(uint32 ilvl)
+    {
+        return 0.577 * ilvl + 9.41;
+    }
+    
+    static float rangedDPS(uint32 ilvl)
+    {
+        return 0.561 * ilvl + 3.02;
+    }
+
+    static float wandDPS(uint32 ilvl)
+    {
+        return 1.2 * ilvl + -7.4;
+    }
+
+    void applyFeralAPBonus(Player* player, ItemTemplate const* proto, float multiplier, bool apply)
+    {
+        if (player->getClass() == CLASS_DRUID)
+        {
+            int32 dpsMod = 0;
+            int32 feralBonus = 0;
+
+            feralBonus += proto->getFeralBonus(dpsMod) * multiplier;
+
+            if (feralBonus)
+                player->ApplyFeralAPBonus(feralBonus, apply);
+        }
+
+    }
+
+    uint32 getItemLevel(Player* player, ItemTemplate const* proto)
+    {
+        std::string query = "SELECT ilvl FROM item_level WHERE player = " + std::to_string(player->GetGUID().GetCounter()) + " AND item = " + std::to_string(proto->ItemId);
+        QueryResult result = CharacterDatabase.Query(query);
+
+        if (result)
+            return (*result)[0].Get<uint32>();
+
+        return 0;
+    }
+
+    static float getStatMultiplier(uint32 slot, uint32 ilvl, ItemTemplate const* proto)
+    {
         switch (slot)
         {
             // Primary budget
@@ -207,8 +399,7 @@ public:
             case EQUIPMENT_SLOT_BODY:
             case EQUIPMENT_SLOT_CHEST:
             case EQUIPMENT_SLOT_LEGS:
-                multiplier = primaryBudget(ilvl) / primaryBudget(proto->ItemLevel);
-                break;
+                return primaryBudget(ilvl) / primaryBudget(proto->ItemLevel);
             // Secondary budget
             case EQUIPMENT_SLOT_SHOULDERS:
             case EQUIPMENT_SLOT_FEET:
@@ -216,57 +407,54 @@ public:
             case EQUIPMENT_SLOT_WAIST:
             case EQUIPMENT_SLOT_TRINKET1:
             case EQUIPMENT_SLOT_TRINKET2:
-                multiplier = secondaryBudget(ilvl) / secondaryBudget(proto->ItemLevel);
-                break;
+                return secondaryBudget(ilvl) / secondaryBudget(proto->ItemLevel);
             // Tertiary budget
             case EQUIPMENT_SLOT_WRISTS:
             case EQUIPMENT_SLOT_FINGER1:
             case EQUIPMENT_SLOT_FINGER2:
             case EQUIPMENT_SLOT_BACK:
-                multiplier = tertiaryBudget(ilvl) / tertiaryBudget(proto->ItemLevel);
-                break;
+                return tertiaryBudget(ilvl) / tertiaryBudget(proto->ItemLevel);
             // Weapon budget
             case EQUIPMENT_SLOT_MAINHAND: // 2H and 1H
             case EQUIPMENT_SLOT_OFFHAND:
-                switch (subclass)
+                switch (proto->SubClass)
                 {
                     case ITEM_SUBCLASS_WEAPON_AXE:
                     case ITEM_SUBCLASS_WEAPON_MACE:
                     case ITEM_SUBCLASS_WEAPON_SWORD:
                     case ITEM_SUBCLASS_WEAPON_FIST:
                     case ITEM_SUBCLASS_WEAPON_DAGGER:
-                        multiplier = weaponBudget(ilvl) / weaponBudget(proto->ItemLevel);
-                        break;
+                        return weaponBudget(ilvl) / weaponBudget(proto->ItemLevel);
                     case ITEM_SUBCLASS_WEAPON_AXE2:
                     case ITEM_SUBCLASS_WEAPON_MACE2:
                     case ITEM_SUBCLASS_WEAPON_POLEARM:
                     case ITEM_SUBCLASS_WEAPON_SWORD2:
                     case ITEM_SUBCLASS_WEAPON_STAFF:
-                        multiplier = primaryBudget(ilvl) / primaryBudget(proto->ItemLevel);
-                        break;
+                        return primaryBudget(ilvl) / primaryBudget(proto->ItemLevel);
+                    default:
+                        return 1;
                 }
-                break;
             // Ranged (bows, guns, and crossbows) and tertiary budget (thrown and wands)
             case EQUIPMENT_SLOT_RANGED:
-                switch (subclass)
+                switch (proto->SubClass)
                 {
                     case ITEM_SUBCLASS_WEAPON_BOW:
                     case ITEM_SUBCLASS_WEAPON_GUN:
                     case ITEM_SUBCLASS_WEAPON_CROSSBOW:
-                        multiplier = rangedBudget(ilvl) / rangedBudget(proto->ItemLevel);
-                        break;
+                        return rangedBudget(ilvl) / rangedBudget(proto->ItemLevel);
                     case ITEM_SUBCLASS_WEAPON_THROWN:
                     case ITEM_SUBCLASS_WEAPON_WAND:
-                        multiplier = tertiaryBudget(ilvl) / tertiaryBudget(proto->ItemLevel);
-                        break;
+                        return tertiaryBudget(ilvl) / tertiaryBudget(proto->ItemLevel);
+                    default:
+                        return 1;
                 }
-
-                break;
             default:
-                multiplier = 1;
-                break;
+                return 1;
         }
+    }
 
+    static uint32 handleArmor(Player* player, ItemTemplate const* proto, uint32 slot, uint32 ilvl, float multiplier, bool apply)
+    {
         uint32 armor = proto->Armor;
 
         if (armor)
@@ -369,8 +557,17 @@ public:
 
         if (proto->ArcaneRes)
             player->HandleStatModifier(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(proto->ArcaneRes) * multiplier, apply);
+        
+        return armor;
+    }
 
+    void handleWeaponDamage(Player* player, ItemTemplate const* proto, _Damage* damages, uint32 slot, uint32 ilvl, bool apply)
+    {
         WeaponAttackType attType = BASE_ATTACK;
+
+        for (int i = 0; i < MAX_ITEM_PROTO_DAMAGES; i++)
+            damages[i] = proto->Damage[i];
+
 
         if (slot == EQUIPMENT_SLOT_RANGED && isInventoryTypeRanged(proto))
             attType = RANGED_ATTACK;
@@ -386,7 +583,7 @@ public:
             {
                 case EQUIPMENT_SLOT_MAINHAND: // 2H and 1H
                 case EQUIPMENT_SLOT_OFFHAND:
-                    switch (subclass)
+                    switch (proto->SubClass)
                     {
                         case ITEM_SUBCLASS_WEAPON_AXE:
                         case ITEM_SUBCLASS_WEAPON_MACE:
@@ -426,7 +623,7 @@ public:
                     break;
                 // Ranged (bows, guns, and crossbows) and tertiary budget (thrown and wands)
                 case EQUIPMENT_SLOT_RANGED:
-                    switch (subclass)
+                    switch (proto->SubClass)
                     {
                         case ITEM_SUBCLASS_WEAPON_BOW:
                         case ITEM_SUBCLASS_WEAPON_GUN:
@@ -476,110 +673,9 @@ public:
             if (player->CanModifyStats() && (damage || proto->Delay) && !player->IsInFeralForm())
                 player->UpdateDamagePhysical(attType);
 
-            _Damage damages[MAX_ITEM_PROTO_DAMAGES];
-
-            for (int i = 0; i < MAX_ITEM_PROTO_DAMAGES; i++)
-            {
-                damages[i] = proto->Damage[i];
-            }
-
-            // Need to find scaling values for secondary weapon damage.
             damages[0].DamageMin = minDamage;
             damages[0].DamageMax = maxDamage;
-
-            updatePlayerCache(player, proto, multiplier, armor, damages);
         }
-
-        if (player->getClass() == CLASS_DRUID)
-        {
-            int32 dpsMod = 0;
-            int32 feralBonus = 0;
-
-            feralBonus += proto->getFeralBonus(dpsMod) * multiplier;
-
-            if (feralBonus)
-                player->ApplyFeralAPBonus(feralBonus, apply);
-        }
-
-        CustomScalingStatValue = 10000 * multiplier;
-    }
-
-    void OnCustomScalingStatValue(Player* /*player*/, ItemTemplate const* /*proto*/, uint32& /*statType*/, int32& val, uint8 /*itemProtoStatNumber*/, uint32 ScalingStatValue, ScalingStatValuesEntry const* /*ssv*/) override
-    {
-        float multiplier = ScalingStatValue / 10000.0f;
-        val *= multiplier;
-    }
-
-private:
-    static float characterLevelToItemLevel(uint32 level)
-    {
-        if (level < 61)
-            return 1 * level + 4.93;
-
-        if (level < 71)
-            return 3 * level + -95;
-
-        return 4 * level + -133;
-    }
-
-    static float primaryBudget(uint32 ilvl)
-    {
-        return 1.33 + 0.469 * ilvl + 1.05E-03 * pow(ilvl, 2);
-    }
-
-    static float secondaryBudget(uint32 ilvl)
-    {
-        return 0.845 + 0.36 * ilvl + 7.23E-04 * pow(ilvl, 2);
-    }
-
-    static float tertiaryBudget(uint32 ilvl)
-    {
-        return 0.597 + 0.27 * ilvl + 5.42E-04 * pow(ilvl, 2);
-    }
-
-    static float trinketBudget(uint32 ilvl)
-    {
-        return 0.845 + 0.36 * ilvl + 7.23E-04 * pow(ilvl, 2);
-    }
-
-    static float weaponBudget(uint32 ilvl)
-    {
-        return 0.523 + 0.2 * ilvl + 4.56E-04 * pow(ilvl, 2);
-    }
-
-    static float rangedBudget(uint32 ilvl)
-    {
-        return 0.435 + 0.149 * ilvl + 3.16E-04 * pow(ilvl, 2);
-    }
-
-    static float weaponDPS1H(uint32 ilvl)
-    {
-        return 0.631 * ilvl + 0.74;
-    }
-
-    static float weaponDPS2H(uint32 ilvl)
-    {
-        return 0.819 * ilvl + 1.13;
-    }
-
-    static float spellcasterDPS1H(uint32 ilvl)
-    {
-        return 0.445 * ilvl + 7.08;
-    }
-
-    static float spellcasterDPS2H(uint32 ilvl)
-    {
-        return 0.577 * ilvl + 9.41;
-    }
-    
-    static float rangedDPS(uint32 ilvl)
-    {
-        return 0.561 * ilvl + 3.02;
-    }
-
-    static float wandDPS(uint32 ilvl)
-    {
-        return 1.2 * ilvl + -7.4;
     }
 
     static bool isInventoryTypeRanged(ItemTemplate const* proto)
