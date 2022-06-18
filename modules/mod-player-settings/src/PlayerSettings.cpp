@@ -230,63 +230,33 @@ public:
     {
         ItemTemplate const *proto = sObjectMgr->GetItemTemplate(item->GetEntry());
 
-        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        if (!proto->InventoryType)
+            return;
 
-        uint32 ilvl = getItemLevel(player, proto);
-
-        if (ilvl)
-        {
-            CharacterDatabase.Execute("UPDATE item_level SET ilvl = {} WHERE player = {} AND item = {}", ilvl, player->GetGUID().GetCounter(), proto->ItemId);
-        }
-        else
-        {
-            ilvl = characterLevelToItemLevel(player->getLevel());
-            CharacterDatabase.Execute("INSERT INTO item_level (player, item, ilvl) VALUES ({}, {}, {})", player->GetGUID().GetCounter(), proto->ItemId, ilvl);
-        }
-
-        CharacterDatabase.CommitTransaction(trans);
+        uint32 ilvl = characterLevelToItemLevel(player->getLevel());
+        CharacterDatabase.Execute("INSERT INTO item_level (player, item, ilvl) VALUES ({}, {}, {})", player->GetGUID().GetCounter(), proto->ItemId, ilvl);
     }
 
     void OnCreateItem(Player* player, Item* item, uint32 /*count*/) override
     {
         ItemTemplate const *proto = sObjectMgr->GetItemTemplate(item->GetEntry());
 
-        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        if (!proto->InventoryType)
+            return;
 
-        uint32 ilvl = getItemLevel(player, proto);
-
-        if (ilvl)
-        {
-            CharacterDatabase.Execute("UPDATE item_level SET ilvl = {} WHERE player = {} AND item = {}", ilvl, player->GetGUID().GetCounter(), proto->ItemId);
-        }
-        else
-        {
-            ilvl = characterLevelToItemLevel(player->getLevel());
-            CharacterDatabase.Execute("INSERT INTO item_level (player, item, ilvl) VALUES ({}, {}, {})", player->GetGUID().GetCounter(), proto->ItemId, ilvl);
-        }
-
-        CharacterDatabase.CommitTransaction(trans);
+        uint32 ilvl = characterLevelToItemLevel(player->getLevel());
+        CharacterDatabase.Execute("INSERT INTO item_level (player, item, ilvl) VALUES ({}, {}, {})", player->GetGUID().GetCounter(), proto->ItemId, ilvl);
     }
 
     void OnQuestRewardItem(Player* player, Item* item, uint32 /*count*/) override
     {
         ItemTemplate const *proto = sObjectMgr->GetItemTemplate(item->GetEntry());
 
-        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        if (!proto->InventoryType)
+            return;
 
-        uint32 ilvl = getItemLevel(player, proto);
-
-        if (ilvl)
-        {
-            CharacterDatabase.Execute("UPDATE item_level SET ilvl = {} WHERE player = {} AND item = {}", ilvl, player->GetGUID().GetCounter(), proto->ItemId);
-        }
-        else
-        {
-            ilvl = characterLevelToItemLevel(player->getLevel());
-            CharacterDatabase.Execute("INSERT INTO item_level (player, item, ilvl) VALUES ({}, {}, {})", player->GetGUID().GetCounter(), proto->ItemId, ilvl);
-        }
-
-        CharacterDatabase.CommitTransaction(trans);
+        uint32 ilvl = characterLevelToItemLevel(player->getLevel());
+        CharacterDatabase.Execute("INSERT INTO item_level (player, item, ilvl) VALUES ({}, {}, {})", player->GetGUID().GetCounter(), proto->ItemId, ilvl);
     }
 
     void OnCustomScalingStatValueBefore(Player* player, ItemTemplate const* proto, uint8 slot, bool apply, uint32& CustomScalingStatValue) override
@@ -401,7 +371,10 @@ private:
 
     uint32 getItemLevel(Player* player, ItemTemplate const* proto)
     {
-        std::string query = "SELECT ilvl FROM item_level WHERE player = " + std::to_string(player->GetGUID().GetCounter()) + " AND item = " + std::to_string(proto->ItemId);
+        std::string query = "SELECT ilvl FROM item_level WHERE player = "
+            + std::to_string(player->GetGUID().GetCounter())
+            + " AND item = " + std::to_string(proto->ItemId)
+            + " ORDER BY ilvl DESC LIMIT 1";
         QueryResult result = CharacterDatabase.Query(query);
 
         if (result)
