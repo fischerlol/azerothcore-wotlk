@@ -11,6 +11,7 @@
 #include "DBUpdater.h"
 #include "ItemTemplate.h"
 #include "Spell.h"
+#include "Pet.h"
 #include <algorithm>
 #include <cstdlib>
 #include <vector>
@@ -26,7 +27,13 @@ enum Spells
     SPELL_GEHENNAS_CURSE = 19716,
     SPELL_IGNITE_MANA = 19659,
     SPELL_SHAZZRAH_CURSE = 19713,
-    SPELL_BURNING_ADRENALINE = 18173
+    SPELL_BURNING_ADRENALINE = 18173,
+    SPELL_BROOD_AFFLICTION_BLACK = 23154,
+    SPELL_BROOD_AFFLICTION_BLUE = 23153,
+    SPELL_BROOD_AFFLICTION_BRONZE = 23170,
+    SPELL_BROOD_AFFLICTION_GREEN = 23169,
+    SPELL_BROOD_AFFLICTION_RED = 23155,
+    SPELL_ONYXIA_SCALE_CLOAK = 22683
 };
 
 class PlayerSettingsCreatureInfo : public DataMap::Base
@@ -192,6 +199,31 @@ public:
 
         if (vaelastrasz)
             player->RemoveAura(vaelastrasz);
+
+        Aura* black = player->GetAura(SPELL_BROOD_AFFLICTION_BLACK);
+
+        if (black)
+            player->RemoveAura(black);
+        
+        Aura* blue = player->GetAura(SPELL_BROOD_AFFLICTION_BLUE);
+
+        if (blue)
+            player->RemoveAura(blue);
+
+        Aura* bronze = player->GetAura(SPELL_BROOD_AFFLICTION_BRONZE);
+
+        if (bronze)
+            player->RemoveAura(bronze);
+        
+        Aura* green = player->GetAura(SPELL_BROOD_AFFLICTION_GREEN);
+
+        if (green)
+            player->RemoveAura(green);
+        
+        Aura* red = player->GetAura(SPELL_BROOD_AFFLICTION_RED);
+
+        if (red)
+            player->RemoveAura(red);
     }
 
     void OnLootItem(Player* player, Item* item, uint32 /*count*/, ObjectGuid /*lootguid*/) override
@@ -204,7 +236,6 @@ public:
 
         if (ilvl)
         {
-
             CharacterDatabase.Execute("UPDATE item_level SET ilvl = {} WHERE player = {} AND item = {}", ilvl, player->GetGUID().GetCounter(), proto->ItemId);
         }
         else
@@ -226,7 +257,6 @@ public:
 
         if (ilvl)
         {
-
             CharacterDatabase.Execute("UPDATE item_level SET ilvl = {} WHERE player = {} AND item = {}", ilvl, player->GetGUID().GetCounter(), proto->ItemId);
         }
         else
@@ -248,7 +278,6 @@ public:
 
         if (ilvl)
         {
-
             CharacterDatabase.Execute("UPDATE item_level SET ilvl = {} WHERE player = {} AND item = {}", ilvl, player->GetGUID().GetCounter(), proto->ItemId);
         }
         else
@@ -888,6 +917,16 @@ private:
             ChatHandler(player->GetSession()).PSendSysMessage("You have been awarded %i bonus honor.", honor);
             mapInfo->rewarded[guid] = true;
         }
+    }
+};
+
+class PlayerSettingsPet : public PetScript
+{
+    PlayerSettingsPet() : PetScript("PlayerSettingsPet") {}
+
+    void OnPetAddToWorld(Pet* pet) override
+    {
+        pet->AddAura(SPELL_ONYXIA_SCALE_CLOAK, pet);
     }
 };
 
