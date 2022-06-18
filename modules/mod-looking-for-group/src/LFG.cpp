@@ -187,17 +187,17 @@ private:
     {
         if (count == 1)
             ChatHandler(session).PSendSysMessage(
-                "|cff00CC00[LFG Queue Announcer]:|r Random Dungeon -- [%u-%u][%u/5] Join %s now!",
+                "|cff00CC00[LFG Queue Announcer]:|r Random Dungeon -- [%u+][%u/5] Join %s now!",
                 minlevel, maxlevel, count, name.c_str()
             );
         else if (count < 5)
             ChatHandler(session).PSendSysMessage(
-                "|cff00CC00[LFG Queue Announcer]:|r Random Dungeon -- [%u-%u][%u/5] Ask %s to open it up!",
+                "|cff00CC00[LFG Queue Announcer]:|r Random Dungeon -- [%u+][%u/5] Ask %s to open it up!",
                 minlevel, maxlevel, count, name.c_str()
             );
         else
             ChatHandler(session).PSendSysMessage(
-                "|cff00CC00[LFG Queue Announcer]:|r Random Dungeon -- [%u-%u][%u/5]",
+                "|cff00CC00[LFG Queue Announcer]:|r Random Dungeon -- [%u+][%u/5]",
                 minlevel, maxlevel, count, name.c_str()
             );
     }
