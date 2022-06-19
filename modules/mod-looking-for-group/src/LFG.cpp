@@ -34,7 +34,6 @@ public:
             return;
 
         uint32 minlevel = UINT_MAX;
-        uint32 maxlevel = 0;
         uint32 level = player->getLevel();
 
         for (lfg::LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end(); it++)
@@ -46,22 +45,19 @@ public:
             
             if (minlevel > dungeon->minlevel)
                 minlevel = dungeon->minlevel;
-
-            if (maxlevel < dungeon->maxlevel)
-                maxlevel = dungeon->maxlevel;
         }
 
-        if (minlevel != UINT_MAX && maxlevel != 0)
-            Announce(player, minlevel, maxlevel);
+        if (minlevel != UINT_MAX)
+            Announce(player, minlevel);
     }
 
-    static void Announce(Player* player, uint32 minlevel, uint32 maxlevel)
+    static void Announce(Player* player, uint32 minlevel)
     {
         uint32 count;
         Player* leader;
 
         getLeaderAndCount(player, &leader, &count);
-        announceToSession(player->GetSession(), minlevel, maxlevel, count, leader->GetPlayerName());
+        announceToSession(player->GetSession(), minlevel, count, leader->GetPlayerName());
 
         const SessionMap& sessions = sWorld->GetAllSessions();
         for (SessionMap::const_iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
@@ -72,7 +68,7 @@ public:
             if (player == itr->second->GetPlayer())
                 continue;
 
-            announceToSession(itr->second, minlevel, maxlevel, count, leader->GetPlayerName());
+            announceToSession(itr->second, minlevel, count, leader->GetPlayerName());
         }
     }
 
@@ -183,22 +179,22 @@ private:
         }
     }
 
-    static void announceToSession(WorldSession* session, uint32 minlevel, uint32 maxlevel, uint32 count, std::string name)
+    static void announceToSession(WorldSession* session, uint32 minlevel, uint32 count, std::string name)
     {
         if (count == 1)
             ChatHandler(session).PSendSysMessage(
                 "|cff00CC00[LFG Queue Announcer]:|r Random Dungeon -- [%u+][%u/5] Join %s now!",
-                minlevel, maxlevel, count, name.c_str()
+                minlevel, count, name.c_str()
             );
         else if (count < 5)
             ChatHandler(session).PSendSysMessage(
                 "|cff00CC00[LFG Queue Announcer]:|r Random Dungeon -- [%u+][%u/5] Ask %s to open it up!",
-                minlevel, maxlevel, count, name.c_str()
+                minlevel, count, name.c_str()
             );
         else
             ChatHandler(session).PSendSysMessage(
                 "|cff00CC00[LFG Queue Announcer]:|r Random Dungeon -- [%u+][%u/5]",
-                minlevel, maxlevel, count, name.c_str()
+                minlevel, count, name.c_str()
             );
     }
 
@@ -269,7 +265,7 @@ public:
         if (!dungeon)
             return;
 
-        LFGPlayer::Announce(player, dungeon->minlevel, dungeon->maxlevel);
+        LFGPlayer::Announce(player, dungeon->minlevel);
     }
 };
 

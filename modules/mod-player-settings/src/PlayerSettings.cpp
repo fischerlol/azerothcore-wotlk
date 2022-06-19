@@ -893,16 +893,6 @@ private:
     }
 };
 
-class PlayerSettingsPet : public PetScript
-{
-    PlayerSettingsPet() : PetScript("PlayerSettingsPet") {}
-
-    void OnPetAddToWorld(Pet* pet) override
-    {
-        pet->AddAura(SPELL_ONYXIA_SCALE_CLOAK, pet);
-    }
-};
-
 class PlayerSettingsUnitScript : public UnitScript
 {
 public:
