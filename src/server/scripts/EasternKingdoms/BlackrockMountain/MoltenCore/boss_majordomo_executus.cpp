@@ -151,7 +151,8 @@ public:
             {
                 summon->CastSpell(summon, SPELL_RAGNAROS_FADE);
                 summon->CastSpell(summon, SPELL_RAGNAROS_SUBMERGE_EFFECT, true);
-                summon->SetUnitFlag(UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
+                summon->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
+                summon->SetImmuneToAll(true);
                 summon->SetReactState(REACT_PASSIVE);
             }
         }
@@ -180,7 +181,9 @@ public:
             else
             {
                 events.SetPhase(PHASE_NONE);
-                me->SetUnitFlag(UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC);
+                me->SetImmuneToAll(true);
+                me->SetNpcFlag(UNIT_NPC_FLAG_GOSSIP);
+                me->SetFaction(FACTION_MAJORDOMO_FRIENDLY);
             }
         }
 
@@ -280,7 +283,12 @@ public:
                     instance->SetBossState(DATA_MAJORDOMO_EXECUTUS, DONE);
                     events.CancelEventGroup(PHASE_COMBAT);
                     me->GetMap()->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, me->GetEntry(), me);
+<<<<<<< HEAD
                     me->SetUnitFlag(UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC);
+=======
+                    me->SetImmuneToAll(true);
+                    me->SetFaction(FACTION_MAJORDOMO_FRIENDLY);
+>>>>>>> 713cddc1ba534cd29b5d62c3f2fb4ed2626003c9
                     EnterEvadeMode();
                     Talk(SAY_DEFEAT);
                     return;
