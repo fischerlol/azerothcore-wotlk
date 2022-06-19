@@ -283,12 +283,8 @@ public:
                     instance->SetBossState(DATA_MAJORDOMO_EXECUTUS, DONE);
                     events.CancelEventGroup(PHASE_COMBAT);
                     me->GetMap()->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, me->GetEntry(), me);
-<<<<<<< HEAD
-                    me->SetUnitFlag(UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC);
-=======
                     me->SetImmuneToAll(true);
                     me->SetFaction(FACTION_MAJORDOMO_FRIENDLY);
->>>>>>> 713cddc1ba534cd29b5d62c3f2fb4ed2626003c9
                     EnterEvadeMode();
                     Talk(SAY_DEFEAT);
                     return;
