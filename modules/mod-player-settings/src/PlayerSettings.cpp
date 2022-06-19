@@ -744,12 +744,12 @@ private:
 
         // resistances (7)
         data << armor;
-        data << proto->HolyRes * statMultiplier;
-        data << proto->FireRes * statMultiplier;
-        data << proto->NatureRes * statMultiplier;
-        data << proto->FrostRes * statMultiplier;
-        data << proto->ShadowRes * statMultiplier;
-        data << proto->ArcaneRes * statMultiplier;
+        data << uint32(proto->HolyRes * statMultiplier);
+        data << uint32(proto->FireRes * statMultiplier);
+        data << uint32(proto->NatureRes * statMultiplier);
+        data << uint32(proto->FrostRes * statMultiplier);
+        data << uint32(proto->ShadowRes * statMultiplier);
+        data << uint32(proto->ArcaneRes * statMultiplier);
 
         data << proto->Delay;
         data << proto->AmmoType;
