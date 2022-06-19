@@ -969,20 +969,21 @@ private:
         if (maxPlayers > 5)
             defence = 1 / (2 + (maxPlayers / 5.0f));
 
-        float multiplier = 1;
-        bool isPet = (attacker->IsHunterPet() || attacker->IsPet() || attacker->IsSummon()) && attacker->IsControlledByPlayer();
+        float multiplier = 1.0f;
         bool isAttackerPlayer = attacker->GetTypeId() == TYPEID_PLAYER;
+        bool isAttackerPet = (attacker->IsHunterPet() || attacker->IsPet() || attacker->IsSummon()) && attacker->IsControlledByPlayer();
         bool isTargetPlayer = target->GetTypeId() == TYPEID_PLAYER;
+        bool isTargetPet = (target->IsHunterPet() || target->IsPet() || target->IsSummon()) && target->IsControlledByPlayer();
 
-        if (!isAttackerPlayer && !isPet)
+        if (!isAttackerPlayer && !isAttackerPet)
             multiplier = defence + (1 - defence) / (maxPlayers - 1) * (nplayers - 1);
 
         if (!instanceMap->IsRaidOrHeroicDungeon())
         {
-            if (!isAttackerPlayer && isTargetPlayer)
+            if ((!isAttackerPlayer && !isAttackerPet) && (isTargetPlayer || isTargetPet))
                 multiplier = multiplier * playerCurve(target->getLevel()) / playerCurve(attacker->getLevel());
-            else if (isAttackerPlayer && !isTargetPlayer)
-                multiplier = creatureCurve(target->getLevel()) / creatureCurve(attacker->getLevel());
+            else if ((isAttackerPlayer || isAttackerPet) && (!isTargetPlayer && !isTargetPet))
+                multiplier = multiplier * creatureCurve(target->getLevel()) / creatureCurve(attacker->getLevel());
         }
 
         return amount * multiplier;

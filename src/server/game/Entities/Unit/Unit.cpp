@@ -1870,6 +1870,18 @@ uint32 Unit::CalcArmorReducedDamage(Unit const* attacker, Unit const* victim, co
     if (levelModifier > 59)
         levelModifier = levelModifier + (4.5f * (levelModifier - 59));
 
+    uint8 victimLevel = victim->getLevel();
+    uint8 minlevel = victimLevel - 3;
+    uint8 maxlevel = victimLevel + 3;
+
+    if (victim)
+    {
+        if (levelModifier < minlevel)
+            levelModifier = minlevel;
+        else if (levelModifier > maxlevel)
+            levelModifier = maxlevel;
+    }
+
     float tmpvalue = 0.1f * armor / (8.5f * levelModifier + 40);
     tmpvalue = tmpvalue / (1.0f + tmpvalue);
 
@@ -3100,7 +3112,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spellInfo
     // Base hit chance from attacker and victim levels
     int32 modHitChance = levelDiff < 3
             ? 96 - levelDiff
-            : 94 - (levelDiff - 2) * MISS_CHANCE_MULTIPLIER;
+            : 94 - MISS_CHANCE_MULTIPLIER;
 
     // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
     if (Player* modOwner = GetSpellModOwner())
@@ -18511,11 +18523,15 @@ float Unit::MeleeSpellMissChance(Unit const* victim, WeaponAttackType attType, i
     else
         missChance -= m_modMeleeHitChance;
 
-    // Limit miss chance from 0 to 60%
+    // Limit miss chance from 0 to 27%
     if (missChance < 0.0f)
         return 0.0f;
-    if (missChance > 60.0f)
-        return 60.0f;
+
+    if (!spellId && haveOffhandWeapon() && missChance > 27.0f)
+        return 27.0f;
+    else
+        return 8.0f;
+
     return missChance;
 }
 
