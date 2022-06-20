@@ -38,7 +38,7 @@ public:
         for (lfg::LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end(); it++)
         {
             lfg::LFGDungeonData const* dungeon = sLFGMgr->GetLFGDungeon(*it);
-            
+
             if (minlevel > dungeon->minlevel)
                 minlevel = dungeon->minlevel;
         }

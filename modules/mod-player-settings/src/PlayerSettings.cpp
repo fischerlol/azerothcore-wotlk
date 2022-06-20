@@ -231,9 +231,13 @@ public:
         ItemTemplate const *proto = sObjectMgr->GetItemTemplate(item->GetEntry());
 
         if (!proto->InventoryType)
+        {
+            LOG_ERROR("server", "InventoryType: {}", proto->InventoryType);
             return;
+        }
 
-        uint32 ilvl = characterLevelToItemLevel(player->getLevel());
+        LOG_ERROR("server", "InventoryType: {}", proto->InventoryType);
+        uint32 ilvl = CharacterLevelToItemLevel(player->getLevel());
         CharacterDatabase.Execute("INSERT INTO item_level (player, item, ilvl) VALUES ({}, {}, {})", player->GetGUID().GetCounter(), proto->ItemId, ilvl);
     }
 
@@ -242,9 +246,13 @@ public:
         ItemTemplate const *proto = sObjectMgr->GetItemTemplate(item->GetEntry());
 
         if (!proto->InventoryType)
+        {
+            LOG_ERROR("server", "InventoryType: {}", proto->InventoryType);
             return;
+        }
 
-        uint32 ilvl = characterLevelToItemLevel(player->getLevel());
+        LOG_ERROR("server", "InventoryType: {}", proto->InventoryType);
+        uint32 ilvl = CharacterLevelToItemLevel(player->getLevel());
         CharacterDatabase.Execute("INSERT INTO item_level (player, item, ilvl) VALUES ({}, {}, {})", player->GetGUID().GetCounter(), proto->ItemId, ilvl);
     }
 
@@ -253,9 +261,13 @@ public:
         ItemTemplate const *proto = sObjectMgr->GetItemTemplate(item->GetEntry());
 
         if (!proto->InventoryType)
+        {
+            LOG_ERROR("server", "InventoryType: {}", proto->InventoryType);
             return;
+        }
 
-        uint32 ilvl = characterLevelToItemLevel(player->getLevel());
+        LOG_ERROR("server", "InventoryType: {}", proto->InventoryType);
+        uint32 ilvl = CharacterLevelToItemLevel(player->getLevel());
         CharacterDatabase.Execute("INSERT INTO item_level (player, item, ilvl) VALUES ({}, {}, {})", player->GetGUID().GetCounter(), proto->ItemId, ilvl);
     }
 
@@ -282,8 +294,7 @@ public:
         val *= multiplier;
     }
 
-private:
-    static float characterLevelToItemLevel(uint32 level)
+    static float CharacterLevelToItemLevel(uint32 level)
     {
         if (level < 61)
             return 1 * level + 4.93;
@@ -294,6 +305,7 @@ private:
         return 4 * level + -133;
     }
 
+private:
     static float primaryBudget(uint32 ilvl)
     {
         return 1.33 + 0.469 * ilvl + 1.05E-03 * pow(ilvl, 2);
