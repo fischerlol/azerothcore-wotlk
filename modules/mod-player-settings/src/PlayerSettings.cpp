@@ -96,7 +96,7 @@ public:
                 PlayerSettingsMapInfo *mapInfo = map->CustomData.GetDefault<PlayerSettingsMapInfo>("PlayerSettingsMapInfo");
                 uint32 nplayers = std::min(5u, std::max(mapInfo->nplayers, mapInfo->veto));
 
-                amount = amount * 2 * mapInfo->nplayers / maxPlayers * (1 + experienceMultiplier * (nplayers - 1));
+                amount = amount * mapInfo->nplayers / maxPlayers * (1 + experienceMultiplier * (nplayers - 1));
             }
         }
     }
@@ -905,6 +905,25 @@ private:
     }
 };
 
+class PlayerSettingsMisc : public MiscScript
+{
+public:
+    PlayerSettingsMisc() : MiscScript("PlayerSettingsMisc") {}
+
+    void OnItemCreate(Item* /*item*/, ItemTemplate const* proto, Player const* owner) override
+    {
+        if (!proto->InventoryType)
+        {
+            LOG_ERROR("server", "InventoryType: {}", proto->InventoryType);
+            return;
+        }
+
+        LOG_ERROR("server", "InventoryType: {}", proto->InventoryType);
+        uint32 ilvl = PlayerSettingsPlayerScript::CharacterLevelToItemLevel(owner->getLevel());
+        CharacterDatabase.Execute("INSERT INTO item_level (player, item, ilvl) VALUES ({}, {}, {})", owner->GetGUID().GetCounter(), proto->ItemId, ilvl);
+    }
+};
+
 class PlayerSettingsUnitScript : public UnitScript
 {
 public:
@@ -1309,6 +1328,7 @@ void AddPlayerSettingsScripts()
 {
     new PlayerSettingsWorldScript();
     new PlayerSettingsPlayerScript();
+    new PlayerSettingsMisc();
     new PlayerSettingsUnitScript();
     new PlayerSettingsAllMapScript();
     new PlayerSettingsAllCreatureScript();

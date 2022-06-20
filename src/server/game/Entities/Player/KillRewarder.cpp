@@ -190,8 +190,8 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
     // Give reputation and kill credit only in PvE.
     if (!_isPvP || _isBattleGround)
     {
-        float xpRate = 1.0f;
-        float reputationRate = 1.0f;
+        float xpRate = _group ? _groupRate / _count : 1.0f;
+        float reputationRate = _group ? _groupRate / _count : 1.0f;
         sScriptMgr->OnRewardKillRewarder(player, isDungeon, xpRate);                                              // Personal rate is 100%.
 
         if (_xp)
