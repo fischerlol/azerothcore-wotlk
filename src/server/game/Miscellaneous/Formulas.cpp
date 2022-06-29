@@ -55,9 +55,14 @@ uint32 Acore::XP::BaseGain(uint8 pl_level, uint8 mob_level, ContentLevels conten
     }
     else
     {
-        int nLevelDiff = std::max(mob_level - pl_level, -3);
-        uint8 ZD = GetZeroDifference(pl_level);
-        baseGain = (pl_level * 5 + nBaseExp) * (ZD + nLevelDiff) / ZD;
+        uint8 gray_level = GetGrayLevel(pl_level);
+        if (mob_level > gray_level)
+        {
+            uint8 ZD = GetZeroDifference(pl_level);
+            baseGain = (pl_level * 5 + nBaseExp) * (ZD + mob_level - pl_level) / ZD;
+        }
+        else
+            baseGain = 0;
     }
 
     //sScriptMgr->OnBaseGainCalculation(baseGain, pl_level, mob_level, content); // pussywizard: optimization

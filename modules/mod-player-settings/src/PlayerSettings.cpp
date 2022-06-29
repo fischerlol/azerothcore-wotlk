@@ -58,7 +58,7 @@ public:
 };
 
 static bool enabled;
-static float experienceMultiplier, goldMultiplier, honorMultiplier;
+static float goldMultiplier, honorMultiplier;
 
 class PlayerSettingsWorldScript : public WorldScript
 {
@@ -73,7 +73,6 @@ public:
     void SetInitialWorldSettings()
     {
         enabled = sConfigMgr->GetOption<bool>("PlayerSettings.Enable", 1);
-        experienceMultiplier = sConfigMgr->GetOption<float>("PlayerSettings.Experience", 0.1);
         goldMultiplier = sConfigMgr->GetOption<float>("PlayerSettings.Gold", 0.1);
         honorMultiplier = sConfigMgr->GetOption<float>("PlayerSettings.Honor", 0.1);
     }
@@ -94,9 +93,8 @@ public:
             {
                 uint32 maxPlayers = ((InstanceMap *)sMapMgr->FindMap(map->GetId(), map->GetInstanceId()))->GetMaxPlayers();
                 PlayerSettingsMapInfo *mapInfo = map->CustomData.GetDefault<PlayerSettingsMapInfo>("PlayerSettingsMapInfo");
-                uint32 nplayers = std::min(5u, std::max(mapInfo->nplayers, mapInfo->veto));
 
-                amount = amount * mapInfo->nplayers / maxPlayers * (1 + experienceMultiplier * (nplayers - 1));
+                amount = amount * mapInfo->nplayers / maxPlayers;
             }
         }
     }
@@ -330,13 +328,13 @@ public:
     void ModifyPeriodicHealthAurasTick(Unit* target, Unit* healer, uint32& gain) override
     {
         if (check(healer, target))
-            gain = modify(healer, target, gain, true);
+            gain = modify(healer, target, gain, false, true);
     }
 
     void ModifyHealRecieved(Unit* healer, Unit* target, uint32& gain) override
     {
         if (check(healer, target))
-            gain = modify(healer, target, gain);
+            gain = modify(healer, target, gain, false);
     }
 
 private:
@@ -364,7 +362,7 @@ private:
         return true;
     }
 
-    uint32 modify(Unit* attacker, Unit* target, uint32 amount, bool isPeriodicHeal = false)
+    uint32 modify(Unit* attacker, Unit* target, uint32 amount, bool isDamage = true, bool isPeriodicHeal = false)
     {
         PlayerSettingsMapInfo *mapInfo = target->GetMap()->CustomData.GetDefault<PlayerSettingsMapInfo>("PlayerSettingsMapInfo");
         InstanceMap *instanceMap = ((InstanceMap *)sMapMgr->FindMap(target->GetMapId(), target->GetInstanceId()));
@@ -385,8 +383,10 @@ private:
         bool isAttackerPet = (attacker->IsHunterPet() || attacker->IsPet() || attacker->IsSummon() || attacker->IsTotem()) && attacker->IsControlledByPlayer();
         bool isTargetPlayer = target->GetTypeId() == TYPEID_PLAYER;
         bool isTargetPet = (target->IsHunterPet() || target->IsPet() || target->IsSummon() || target->IsTotem()) && attacker->IsControlledByPlayer();
+        bool isSelfHarm = (isAttackerPlayer && isTargetPlayer) && attacker->GetGUID() == target->GetGUID() && isDamage;
+        bool isCharmedPlayer = isAttackerPlayer && attacker->GetCharmerGUID();
 
-        if (!isAttackerPlayer && !isAttackerPet)
+        if ((!isAttackerPlayer || isCharmedPlayer || isSelfHarm) && !isAttackerPet)
             multiplier = defence + (1 - defence) / (maxPlayers - 1) * (nplayers - 1);
 
         Player* player = nullptr;
@@ -686,7 +686,6 @@ public:
 
         nplayers = std::min(5u, std::max(mapInfo->nplayers, mapInfo->veto));
 
-        handler->PSendSysMessage("Experience multiplier set to %.2f.", !nplayers ? 0 : (1 + experienceMultiplier * (nplayers - 1)));
         handler->PSendSysMessage("Gold multiplier set to %.2f.", !nplayers ? 0 : (1 + goldMultiplier * (nplayers - 1)));
         handler->PSendSysMessage("Honor multiplier set to %.2f.", !nplayers ? 0 : (1 + honorMultiplier * (nplayers - 1)));
 

@@ -51,6 +51,7 @@ private:
     uint32 _aliveSumLevel;
     uint32 _sumLevel;
     uint32 _xp;
+    bool _isFullXP;
     uint8 _maxLevel;
     bool _isBattleGround;
     bool _isPvP;
