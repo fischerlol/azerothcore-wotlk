@@ -558,10 +558,13 @@ public:
         uint32 previousHealth = creature->GetHealth();
         uint32 previousMaxHealth = creature->GetMaxHealth();
 
-        creature->SetCreateHealth(scaledHealth);
-        creature->SetMaxHealth(scaledHealth);
-        creature->ResetPlayerDamageReq();
-        creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)scaledHealth);
+        if (scaledHealth != previousHealth)
+        {
+            creature->SetCreateHealth(scaledHealth);
+            creature->SetMaxHealth(scaledHealth);
+            creature->ResetPlayerDamageReq();
+            creature->SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, (float)scaledHealth);
+        }
 
         uint32 scaledCurrentHealth = previousHealth && previousMaxHealth ? float(scaledHealth) / float(previousMaxHealth) * float(previousHealth) : 0;
 
