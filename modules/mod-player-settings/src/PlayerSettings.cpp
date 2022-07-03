@@ -558,7 +558,7 @@ public:
         uint32 previousHealth = creature->GetHealth();
         uint32 previousMaxHealth = creature->GetMaxHealth();
 
-        if (scaledHealth != previousHealth)
+        if (scaledHealth != previousMaxHealth)
         {
             creature->SetCreateHealth(scaledHealth);
             creature->SetMaxHealth(scaledHealth);
