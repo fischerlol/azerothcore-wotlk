@@ -18,8 +18,16 @@ public:
 
     bool CanJoinLfg(Player* player, uint8 /*roles*/, lfg::LfgDungeonSet& dungeons, const std::string& /*comment*/) override
     {
-        if (isRaidBrowser(player) || isRandomDungeon(dungeons) || isLFGGroup(player))
+        bool hardcore = player->HasAura(3758285);
+
+        if (isRaidBrowser(player) || (isRandomDungeon(dungeons) && !hardcore) || isLFGGroup(player))
             return true;
+
+        if (isRandomDungeon(dungeons) && hardcore)
+        {
+            ChatHandler(player->GetSession()).SendSysMessage("Hardcore players cannot join random dungeons.");
+            return false;
+        }
 
         uint32 dungeonId = randomDungeon(dungeons);
         transport(player, dungeonId);

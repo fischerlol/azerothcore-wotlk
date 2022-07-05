@@ -2,6 +2,7 @@
 #include "Config.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "ScriptedGossip.h"
 #include "DataMap.h"
 #include "Group.h"
 #include "DBUpdater.h"
@@ -11,6 +12,9 @@
 
 #define TITLES_OFFSET           180
 #define TITLES_PER_RANK         9
+
+#define GOSSIP_BACK             1
+#define GOSSIP_OPTION           2
 
 const std::map<uint32, uint32> Class2Index = {
     { CLASS_WARRIOR, 0 },
@@ -344,6 +348,94 @@ public:
     }
 };
 
+class npc_starter : public CreatureScript
+{
+public:
+    npc_starter() : CreatureScript("npc_starter") {}
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (!sConfigMgr->GetOption<bool>("Hardcore.Enable", false))
+            return false;
+
+        ClearGossipMenuFor(player);
+
+        std::string query = "SELECT counter FROM character_achievement_progress WHERE criteria = 111 AND guid = " + std::to_string(player->GetGUID().GetCounter());
+        QueryResult result = CharacterDatabase.Query(query);    
+
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (player->getLevel() == 1 && (player->GetMoney() == 0) && (player->GetFreeInventorySpace() >= 15) && (!player->HasAura(SPELL_AURA_HARDCORE)) && !result)
+            AddGossipItemFor(player, 62000, 1, GOSSIP_SENDER_MAIN, GOSSIP_OPTION);
+
+        switch (player->getRace())
+        {
+        case RACE_HUMAN:
+            SendGossipMenuFor(player, 50016, creature->GetGUID());
+            break;
+        case RACE_NIGHTELF:
+            SendGossipMenuFor(player, 4936, creature->GetGUID());
+            break;
+        case RACE_DWARF:
+            SendGossipMenuFor(player, 4937, creature->GetGUID());
+            break;
+        case RACE_GNOME:
+            SendGossipMenuFor(player, 4937, creature->GetGUID());
+            break;
+        case RACE_DRAENEI:
+            SendGossipMenuFor(player, 8667, creature->GetGUID());
+            break;
+        case RACE_ORC:
+            SendGossipMenuFor(player, 3583, creature->GetGUID());
+            break;
+        case RACE_TROLL:
+            SendGossipMenuFor(player, 3583, creature->GetGUID());
+            break;
+        case RACE_TAUREN:
+            SendGossipMenuFor(player, 4935, creature->GetGUID());
+            break;
+        case RACE_BLOODELF:
+            SendGossipMenuFor(player, 16703, creature->GetGUID());
+            break;
+        case RACE_UNDEAD_PLAYER:
+            SendGossipMenuFor(player, 938, creature->GetGUID());
+            break;
+        }
+
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+
+        if (!sConfigMgr->GetOption<bool>("Hardcore.Enable", false))
+            return false;
+
+        if (sender != GOSSIP_SENDER_MAIN)
+            return false;
+
+        if (action == GOSSIP_BACK)
+        {
+            OnGossipHello(player, creature);
+        }
+        else if (action == GOSSIP_OPTION)
+        {
+            ClearGossipMenuFor(player);
+            AddGossipItemFor(player, 62001, 1, GOSSIP_SENDER_MAIN, GOSSIP_OPTION + 1);
+            AddGossipItemFor(player, 62002, 1, GOSSIP_SENDER_MAIN, GOSSIP_BACK);
+            SendGossipMenuFor(player, 60047, creature->GetGUID());
+        }
+        else if (action == GOSSIP_OPTION + 1)
+        {
+            player->CastSpell(player, SPELL_AURA_HARDCORE, true);
+            CloseGossipMenuFor(player);
+        }
+
+        return true;
+    }
+};
+
 void AddHardcoreScripts()
 {
     new HardcorePlayer();
@@ -351,4 +443,5 @@ void AddHardcoreScripts()
     new HardcoreMisc();
     new HardcoreCommand();
     new HardcoreDatabase();
+    new npc_starter();
 }
