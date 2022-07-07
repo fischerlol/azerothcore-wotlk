@@ -43,4 +43,4 @@ DuelReset.Zones = "0"
 #                     ""  - (any)
 #        Default:     "12;14;809" - (Elwynn Forest;Durotar;Gates of Ironforge)
 
-DuelReset.Areas = "12;14;809"
+DuelReset.Areas = "12;14;809;4395"
