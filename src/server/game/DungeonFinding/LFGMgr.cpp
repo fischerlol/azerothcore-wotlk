@@ -650,19 +650,10 @@ namespace lfg
             else
                 players.insert(player->GetGUID());
 
-            // Xinef: Check dungeon cooldown only for random dungeons
-            // Xinef: Moreover check this only if dungeon is not started, afterwards its obvious that players will have the cooldown
-            if (joinData.result == LFG_JOIN_OK && !isContinue && rDungeonId)
+            // Remove Dungeon Finder Cooldown if still exists
+            if (player->HasAura(LFG_SPELL_DUNGEON_COOLDOWN))
             {
-                if (player->HasAura(LFG_SPELL_DUNGEON_COOLDOWN)) // xinef: added !isContinue
-                    joinData.result = LFG_JOIN_RANDOM_COOLDOWN;
-                else if (grp)
-                {
-                    for (GroupReference* itr = grp->GetFirstMember(); itr != nullptr && joinData.result == LFG_JOIN_OK; itr = itr->next())
-                        if (Player* plrg = itr->GetSource())
-                            if (plrg->HasAura(LFG_SPELL_DUNGEON_COOLDOWN)) // xinef: added !isContinue
-                                joinData.result = LFG_JOIN_PARTY_RANDOM_COOLDOWN;
-                }
+                player->RemoveAurasDueToSpell(LFG_SPELL_DUNGEON_COOLDOWN);
             }
         }
 
