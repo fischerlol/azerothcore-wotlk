@@ -78,7 +78,7 @@ INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 
 DELETE FROM `creature_queststarter` WHERE `quest` = 7496;
 INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
-(1748, 7496);
+(29611, 7496);
 
 DELETE FROM `creature_questender` WHERE `quest` = 7491;
 INSERT INTO `creature_questender` (`id`, `quest`) VALUES
