@@ -12,7 +12,7 @@ set @VENDOR_HORDE    = 12795; -- First Sergeant Hola'mahi
 
 DELETE FROM `npc_vendor` WHERE (`entry` = @VENDOR_ALLIANCE) AND `item` IN 
 (23272, 23273, 23274, 23275, 23276, 23277, 23278, 23279, 23280, 23281, 23282, 23283, 23284, 23285, 23286, 23287,
- 23288, 23289, 23290, 23291, 23292, 23293, 23294, 23295, 23296, 23297, 23298, 23299, 23300, 23301, 23302, 23303,
+ 23288, 23289, 23290, 23291, 23292, 23293, 23294, 123295, 23296, 23297, 23298, 23299, 23300, 23301, 23302, 23303,
  23304, 23305, 23306, 23307, 23308, 23309, 23310, 23311, 23312, 23313, 23314, 23315, 23316, 23317, 23318, 23319,
  29594, 29595, 29596, 29597, 29598, 29599, 16437, 16440, 16442, 16446, 16448, 16449, 16450, 16451, 16452, 16453,
  16454, 16455, 16456, 16457, 16459, 16443, 16441, 16444, 16462, 16463, 16465, 16466, 16467, 16468, 16471, 16472,
@@ -139,7 +139,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_ALLIANCE, 0, 17604, 0, 0, 4049, 0),
 (@VENDOR_ALLIANCE, 0, 17607, 0, 0, 4050, 0),
 
--- Shaman 
+-- Shaman Set
 (@VENDOR_ALLIANCE, 0, 29610, 0, 0, 4051, 0),
 (@VENDOR_ALLIANCE, 0, 29609, 0, 0, 4052, 0),
 (@VENDOR_ALLIANCE, 0, 29607, 0, 0, 4053, 0),
@@ -147,7 +147,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_ALLIANCE, 0, 29611, 0, 0, 4055, 0),
 (@VENDOR_ALLIANCE, 0, 29606, 0, 0, 4056, 0),
 
--- Mage 
+-- Mage Set
 (@VENDOR_ALLIANCE, 0, 16441, 0, 0, 4057, 0),
 (@VENDOR_ALLIANCE, 0, 16443, 0, 0, 4058, 0),
 (@VENDOR_ALLIANCE, 0, 16440, 0, 0, 4059, 0),
@@ -155,7 +155,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_ALLIANCE, 0, 16444, 0, 0, 4061, 0),
 (@VENDOR_ALLIANCE, 0, 16437, 0, 0, 4062, 0),
 
--- Warlock 
+-- Warlock Set
 (@VENDOR_ALLIANCE, 0, 17578, 0, 0, 4063, 0),
 (@VENDOR_ALLIANCE, 0, 17581, 0, 0, 4064, 0),
 (@VENDOR_ALLIANCE, 0, 17584, 0, 0, 4065, 0),
@@ -163,7 +163,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_ALLIANCE, 0, 17580, 0, 0, 4067, 0),
 (@VENDOR_ALLIANCE, 0, 17583, 0, 0, 4068, 0),
 
--- Druid
+-- Druid Set
 (@VENDOR_ALLIANCE, 0, 16451, 0, 0, 4069, 0),
 (@VENDOR_ALLIANCE, 0, 16452, 0, 0, 4070, 0),
 (@VENDOR_ALLIANCE, 0, 16448, 0, 0, 4071, 0),
@@ -260,7 +260,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_HORDE, 0, 23468, 0, 0, 4019, 0), -- Tome of Destruction
 (@VENDOR_HORDE, 0, 23469, 0, 0, 4020, 0), -- Tome of Mending
 
--- Warrior Set Helmet, Chest, Gloves, Legs, Shoulders, Boots
+-- Warrior Set
 (@VENDOR_HORDE, 0, 16542, 0, 0, 4021, 0),
 (@VENDOR_HORDE, 0, 16541, 0, 0, 4022, 0),
 (@VENDOR_HORDE, 0, 16548, 0, 0, 4023, 0),
@@ -268,7 +268,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_HORDE, 0, 16544, 0, 0, 4025, 0),
 (@VENDOR_HORDE, 0, 16545, 0, 0, 4026, 0),
 
--- Paladin Set Helmet, Chest, Gloves, Legs, Shoulders, Boots
+-- Paladin Set
 (@VENDOR_HORDE, 0, 29616, 0, 0, 4027, 0),
 (@VENDOR_HORDE, 0, 29615, 0, 0, 4028, 0),
 (@VENDOR_HORDE, 0, 29613, 0, 0, 4029, 0),
@@ -276,7 +276,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_HORDE, 0, 29617, 0, 0, 4031, 0),
 (@VENDOR_HORDE, 0, 29612, 0, 0, 4032, 0),
 
--- Hunter Set Helmet, Chest, Gloves, Legs, Shoulders, Boots
+-- Hunter Set
 (@VENDOR_HORDE, 0, 16566, 0, 0, 4033, 0),
 (@VENDOR_HORDE, 0, 16565, 0, 0, 4034, 0),
 (@VENDOR_HORDE, 0, 16571, 0, 0, 4035, 0),
@@ -284,7 +284,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_HORDE, 0, 16568, 0, 0, 4037, 0),
 (@VENDOR_HORDE, 0, 16569, 0, 0, 4038, 0),
 
--- Rogue Set Helmet, Chest, Gloves, Legs, Shoulders, Boots
+-- Rogue Set
 (@VENDOR_HORDE, 0, 16561, 0, 0, 4039, 0),
 (@VENDOR_HORDE, 0, 16563, 0, 0, 4040, 0),
 (@VENDOR_HORDE, 0, 16560, 0, 0, 4041, 0),
@@ -292,7 +292,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_HORDE, 0, 16562, 0, 0, 4043, 0),
 (@VENDOR_HORDE, 0, 16558, 0, 0, 4044, 0),
 
--- Priest Set Helmet, Chest, Gloves, Legs, Shoulders, Boots
+-- Priest Set
 (@VENDOR_HORDE, 0, 17623, 0, 0, 4045, 0),
 (@VENDOR_HORDE, 0, 17624, 0, 0, 4046, 0),
 (@VENDOR_HORDE, 0, 17620, 0, 0, 4047, 0),
@@ -300,7 +300,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_HORDE, 0, 17622, 0, 0, 4049, 0),
 (@VENDOR_HORDE, 0, 17618, 0, 0, 4050, 0),
 
--- Shaman Helmet, Chest, Gloves, Legs, Shoulders, Boots
+-- Shaman Set
 (@VENDOR_HORDE, 0, 16578, 0, 0, 4051, 0),
 (@VENDOR_HORDE, 0, 16577, 0, 0, 4052, 0),
 (@VENDOR_HORDE, 0, 16574, 0, 0, 4053, 0),
@@ -308,7 +308,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_HORDE, 0, 16580, 0, 0, 4055, 0),
 (@VENDOR_HORDE, 0, 16573, 0, 0, 4056, 0),
 
--- Mage Helmet, Chest, Gloves, Legs, Shoulders, Boots
+-- Mage Set
 (@VENDOR_HORDE, 0, 16533, 0, 0, 4057, 0),
 (@VENDOR_HORDE, 0, 16535, 0, 0, 4058, 0),
 (@VENDOR_HORDE, 0, 16540, 0, 0, 4059, 0),
@@ -316,7 +316,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_HORDE, 0, 16536, 0, 0, 4061, 0),
 (@VENDOR_HORDE, 0, 16539, 0, 0, 4062, 0),
 
--- Warlock Helmet, Chest, Gloves, Legs, Shoulders, Boots
+-- Warlock Set
 (@VENDOR_HORDE, 0, 17591, 0, 0, 4063, 0),
 (@VENDOR_HORDE, 0, 17592, 0, 0, 4064, 0),
 (@VENDOR_HORDE, 0, 17588, 0, 0, 4065, 0),
@@ -324,7 +324,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_HORDE, 0, 17590, 0, 0, 4067, 0),
 (@VENDOR_HORDE, 0, 17586, 0, 0, 4068, 0),
 
--- Druid Helmet, Chest, Gloves, Legs, Shoulders, Boots
+-- Druid Set
 (@VENDOR_HORDE, 0, 16550, 0, 0, 4069, 0),
 (@VENDOR_HORDE, 0, 16549, 0, 0, 4070, 0),
 (@VENDOR_HORDE, 0, 16555, 0, 0, 4071, 0),
