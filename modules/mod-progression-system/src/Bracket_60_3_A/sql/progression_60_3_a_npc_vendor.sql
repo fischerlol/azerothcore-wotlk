@@ -11,14 +11,15 @@ set @VENDOR_HORDE_WEAPONS    = 12794; -- Stone Guard Zarg
   Stone Guard Zarg  (12794) (horde)
 */
 
--- Fix Lieuteant Jackspring Flags
+-- Fix Lieuteant Jackspring (A) and Stone Guard Zard (H) Flags
 UPDATE `creature_template` SET `npcflag` = 128 WHERE (`entry` = 12784);
+UPDATE `creature_template` SET `npcflag` = 128 WHERE (`entry` = 12794);
 
 DELETE FROM `npc_vendor` WHERE (`entry` = @VENDOR_ALLIANCE_WEAPONS) AND `item` IN 
-(18825, 12584, 18827, 18838, 18865, 23456, 18833, 18836, 18855, 18830, 23451,
- 18869, 18873, 18876, 23455, 18843, 18847, 23451, 23454, 18847, 18847);
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
+(18825, 12584, 18827, 18838, 18865, 23456, 18833, 18836, 18855, 18830, 18867,
+ 18869, 18873, 18876, 23455, 18843, 18847, 23451, 23454, 23452, 23453);
 
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
 -- Epic Weapons Alliance
 (@VENDOR_ALLIANCE_WEAPONS, 0, 18825, 0, 0, 4000, 0), -- Aegis
 (@VENDOR_ALLIANCE_WEAPONS, 0, 12584, 0, 0, 4001, 0), -- Longsword
@@ -30,7 +31,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_ALLIANCE_WEAPONS, 0, 18836, 0, 0, 4007, 0), -- Repeater
 (@VENDOR_ALLIANCE_WEAPONS, 0, 18855, 0, 0, 4008, 0), -- Hand Cannon
 (@VENDOR_ALLIANCE_WEAPONS, 0, 18830, 0, 0, 4009, 0), -- Sunderer
-(@VENDOR_ALLIANCE_WEAPONS, 0, 23451, 0, 0, 4010, 0), -- Battle Hammer
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18867, 0, 0, 4010, 0), -- Battle Hammer
 (@VENDOR_ALLIANCE_WEAPONS, 0, 18869, 0, 0, 4011, 0), -- Glaive
 (@VENDOR_ALLIANCE_WEAPONS, 0, 18873, 0, 0, 4012, 0), -- Stave
 (@VENDOR_ALLIANCE_WEAPONS, 0, 18876, 0, 0, 4013, 0), -- Claymore
@@ -39,14 +40,14 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_ALLIANCE_WEAPONS, 0, 18847, 0, 0, 4016, 0), -- Left Hand Blade
 (@VENDOR_ALLIANCE_WEAPONS, 0, 23451, 0, 0, 4017, 0), -- Mageblade
 (@VENDOR_ALLIANCE_WEAPONS, 0, 23454, 0, 0, 4018, 0), -- Warhammer
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18847, 0, 0, 4019, 0), -- Tome of Power
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18847, 0, 0, 4020, 0); -- Tome of Restoration
+(@VENDOR_ALLIANCE_WEAPONS, 0, 23452, 0, 0, 4019, 0), -- Tome of Power
+(@VENDOR_ALLIANCE_WEAPONS, 0, 23453, 0, 0, 4020, 0); -- Tome of Restoration
 
 DELETE FROM `npc_vendor` WHERE (`entry` = @VENDOR_HORDE_WEAPONS) AND `item` IN 
 (18826, 16345, 18828, 18840, 18866, 23467, 18835, 18837, 18860, 18831, 18868,
  18871, 18874, 18877, 23465, 18844, 18848, 23466, 23464, 23468, 23469);
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
 
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
 -- Epic Horde
 (@VENDOR_HORDE_WEAPONS, 0, 18826, 0, 0, 4000, 0), -- Shield Wall
 (@VENDOR_HORDE_WEAPONS, 0, 16345, 0, 0, 4001, 0), -- Blade
@@ -83,9 +84,9 @@ DELETE FROM `npc_vendor` WHERE (`entry` = @VENDOR_ALLIANCE_ARMOR) AND `item` IN
  17603, 17604, 17607, 29610, 29609, 29607, 29608, 29611, 29606, 
  16441, 16443, 16440, 16442, 16444, 16437, 17578, 17581, 17584, 
  17579, 17580, 17583, 16451, 16452, 16448, 16450, 16449, 16459);
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
 
--- Warrior Set 
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
+-- Warrior Set
 (@VENDOR_ALLIANCE_ARMOR, 0, 16478, 0, 0, 4021, 0),
 (@VENDOR_ALLIANCE_ARMOR, 0, 16477, 0, 0, 4022, 0),
 (@VENDOR_ALLIANCE_ARMOR, 0, 16484, 0, 0, 4023, 0),
@@ -164,8 +165,8 @@ DELETE FROM `npc_vendor` WHERE (`entry` = @VENDOR_HORDE_ARMOR) AND `item` IN
  17625, 17622, 17618, 16578, 16577, 16574, 16579, 16580, 16573, 
  16533, 16535, 16540, 16534, 16536, 16539, 17591, 17592, 17588, 
  17593, 17590, 17586, 16550, 16549, 16555, 16552, 16551, 16554);
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
 
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
 -- Warrior Set
 (@VENDOR_HORDE_ARMOR, 0, 16542, 0, 0, 4021, 0),
 (@VENDOR_HORDE_ARMOR, 0, 16541, 0, 0, 4022, 0),
