@@ -6,18 +6,83 @@ set @VENDOR_HORDE_ARMOR      = 12795; -- First Sergeant Hola'mahi
 set @VENDOR_HORDE_WEAPONS    = 12794; -- Stone Guard Zarg
 
 /*
+  Restore <Legacy Weapon Quartermaster> lvl 60 epic items
+  Lieutenant Jackspring (12784) (alliance)
+  Stone Guard Zarg  (12794) (horde)
+*/
+
+-- Fix Lieuteant Jackspring Flags
+UPDATE `creature_template` SET `npcflag` = 128 WHERE (`entry` = 12784);
+
+DELETE FROM `npc_vendor` WHERE (`entry` = @VENDOR_ALLIANCE_WEAPONS) AND `item` IN 
+(18825, 12584, 18827, 18838, 18865, 23456, 18833, 18836, 18855, 18830, 23451,
+ 18869, 18873, 18876, 23455, 18843, 18847, 23451, 23454, 18847, 18847);
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
+
+-- Epic Weapons Alliance
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18825, 0, 0, 4000, 0), -- Aegis
+(@VENDOR_ALLIANCE_WEAPONS, 0, 12584, 0, 0, 4001, 0), -- Longsword
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18827, 0, 0, 4002, 0), -- Handaxe
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18838, 0, 0, 4003, 0), -- Dirk
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18865, 0, 0, 4004, 0), -- Punisher
+(@VENDOR_ALLIANCE_WEAPONS, 0, 23456, 0, 0, 4005, 0), -- Swiftblade
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18833, 0, 0, 4006, 0), -- Bullseye
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18836, 0, 0, 4007, 0), -- Repeater
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18855, 0, 0, 4008, 0); -- Hand Cannon
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18830, 0, 0, 4009, 0), -- Sunderer
+(@VENDOR_ALLIANCE_WEAPONS, 0, 23451, 0, 0, 4010, 0), -- Battle Hammer
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18869, 0, 0, 4011, 0), -- Glaive
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18873, 0, 0, 4012, 0), -- Stave
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18876, 0, 0, 4013, 0), -- Claymore
+(@VENDOR_ALLIANCE_WEAPONS, 0, 23455, 0, 0, 4014, 0), -- Demolisher
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18843, 0, 0, 4015, 0), -- Right Hand Blade
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18847, 0, 0, 4016, 0), -- Left Hand Blade
+(@VENDOR_ALLIANCE_WEAPONS, 0, 23451, 0, 0, 4017, 0), -- Mageblade
+(@VENDOR_ALLIANCE_WEAPONS, 0, 23454, 0, 0, 4018, 0), -- Warhammer
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18847, 0, 0, 4019, 0), -- Tome of Power
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18847, 0, 0, 4020, 0); -- Tome of Restoration
+
+DELETE FROM `npc_vendor` WHERE (`entry` = @VENDOR_HORDE_WEAPONS) AND `item` IN 
+(18826, 16345, 18828, 18840, 18866, 23467, 18835, 18837, 18860, 18831, 18868,
+ 18871, 18874, 18877, 23465, 18844, 18848, 23466, 23464, 23468, 23469);
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
+
+-- Epic Horde
+(@VENDOR_HORDE_WEAPONS, 0, 18826, 0, 0, 4000, 0), -- Shield Wall
+(@VENDOR_HORDE_WEAPONS, 0, 16345, 0, 0, 4001, 0), -- Blade
+(@VENDOR_HORDE_WEAPONS, 0, 18828, 0, 0, 4002, 0), -- Cleaver
+(@VENDOR_HORDE_WEAPONS, 0, 18840, 0, 0, 4003, 0), -- Razor
+(@VENDOR_HORDE_WEAPONS, 0, 18866, 0, 0, 4004, 0), -- Bludgeon
+(@VENDOR_HORDE_WEAPONS, 0, 23467, 0, 0, 4005, 0), -- Quickblade
+(@VENDOR_HORDE_WEAPONS, 0, 18835, 0, 0, 4006, 0), -- Recurve
+(@VENDOR_HORDE_WEAPONS, 0, 18837, 0, 0, 4007, 0), -- Crossbow
+(@VENDOR_HORDE_WEAPONS, 0, 18860, 0, 0, 4008, 0); -- Street Sweeper
+(@VENDOR_HORDE_WEAPONS, 0, 18831, 0, 0, 4009, 0), -- Battle Axe
+(@VENDOR_HORDE_WEAPONS, 0, 18868, 0, 0, 4010, 0), -- Pulverizer
+(@VENDOR_HORDE_WEAPONS, 0, 18871, 0, 0, 4011, 0), -- Pig Sticker
+(@VENDOR_HORDE_WEAPONS, 0, 18874, 0, 0, 4012, 0), -- War Staff
+(@VENDOR_HORDE_WEAPONS, 0, 18877, 0, 0, 4013, 0), -- Greatsword
+(@VENDOR_HORDE_WEAPONS, 0, 23465, 0, 0, 4014, 0), -- Destroyer
+(@VENDOR_HORDE_WEAPONS, 0, 18844, 0, 0, 4015, 0), -- Right Claw
+(@VENDOR_HORDE_WEAPONS, 0, 18848, 0, 0, 4016, 0), -- Left Claw
+(@VENDOR_HORDE_WEAPONS, 0, 23466, 0, 0, 4017, 0), -- Spellblade
+(@VENDOR_HORDE_WEAPONS, 0, 23464, 0, 0, 4018, 0), -- Battle Mace
+(@VENDOR_HORDE_WEAPONS, 0, 23468, 0, 0, 4019, 0), -- Tome of Destruction
+(@VENDOR_HORDE_WEAPONS, 0, 23469, 0, 0, 4020, 0), -- Tome of Mending
+
+/*
   Restore <Legacy Armor Quartermaster> lvl 60 blue and epic items, do not delete the previous items lvl 50-59
   Sergeant Major Clate (12785) (alliance)
   First Sergeant Hola'mahi  (12795) (horde)
 */
 
 DELETE FROM `npc_vendor` WHERE (`entry` = @VENDOR_ALLIANCE_ARMOR) AND `item` IN 
-(16437, 16440, 16442, 16446, 16448, 16449, 16450, 16451, 16452, 
- 16453, 16454, 16455, 16456, 16457, 16459, 16443, 16441, 16444, 
- 16462, 16463, 16465, 16466, 16467, 16468, 16471, 16472, 16473,
- 16474, 16475, 16476, 16477, 16478, 16479, 16480, 16483, 16484, 
- 17578, 17579, 17580, 17581, 17583, 17584, 17602, 17603, 17604, 
- 17605, 17607, 17608, 29606, 29607, 29608, 29609, 29610, 29611);
+(16478, 16477, 16484, 16479, 16480, 16483, 16474, 16473, 16471, 
+ 16475, 16476, 16472, 16465, 16466, 16463, 16467, 16468, 16462, 
+ 16455, 16453, 16454, 16456, 16457, 16446, 17602, 17605, 17608,
+ 17603, 17604, 17607, 29610, 29609, 29607, 29608, 29611, 29606, 
+ 16441, 16443, 16440, 16442, 16444, 16437, 17578, 17581, 17584, 
+ 17579, 17580, 17583, 16451, 16452, 16448, 16450, 16449, 16459);
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
 
 -- Warrior Set 
@@ -37,12 +102,12 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_ALLIANCE_ARMOR, 0, 16472, 0, 0, 4032, 0),
 
 -- Hunter Set 
-(@VENDOR_ALLIANCE_ARMOR, 0, 16566, 0, 0, 4033, 0),
-(@VENDOR_ALLIANCE_ARMOR, 0, 16565, 0, 0, 4034, 0),
-(@VENDOR_ALLIANCE_ARMOR, 0, 16571, 0, 0, 4035, 0),
-(@VENDOR_ALLIANCE_ARMOR, 0, 16567, 0, 0, 4036, 0),
-(@VENDOR_ALLIANCE_ARMOR, 0, 16568, 0, 0, 4037, 0),
-(@VENDOR_ALLIANCE_ARMOR, 0, 16569, 0, 0, 4038, 0),
+(@VENDOR_ALLIANCE_ARMOR, 0, 16465, 0, 0, 4033, 0),
+(@VENDOR_ALLIANCE_ARMOR, 0, 16466, 0, 0, 4034, 0),
+(@VENDOR_ALLIANCE_ARMOR, 0, 16463, 0, 0, 4035, 0),
+(@VENDOR_ALLIANCE_ARMOR, 0, 16467, 0, 0, 4036, 0),
+(@VENDOR_ALLIANCE_ARMOR, 0, 16468, 0, 0, 4037, 0),
+(@VENDOR_ALLIANCE_ARMOR, 0, 16462, 0, 0, 4038, 0),
 
 -- Rogue Set 
 (@VENDOR_ALLIANCE_ARMOR, 0, 16455, 0, 0, 4039, 0),
@@ -93,12 +158,12 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_ALLIANCE_ARMOR, 0, 16459, 0, 0, 4074, 0);
 
 DELETE FROM `npc_vendor` WHERE (`entry` = @VENDOR_HORDE_ARMOR) AND `item` IN 
-(16533, 16534, 16535, 16536, 16539, 16540, 16541, 16542, 16543, 
- 16544, 16545, 16548, 16549, 16550, 16551, 16552, 16554, 16555, 
- 16558, 16560, 16561, 16562, 16563, 16564, 16565, 16566, 16567, 
- 16568, 16569, 16571, 16573, 16574, 16577, 16578, 16579, 16580, 
- 17586, 17588, 17590, 17591, 17592, 17593, 17618, 17620, 17622, 
- 17623, 17624, 17625, 29612, 29613, 29614, 29615, 29616, 29617);
+(16542, 16541, 16548, 16543, 16544, 16545, 29616, 29615, 29613, 
+ 29614, 29617, 29612, 16566, 16565, 16571, 16567, 16568, 16569, 
+ 16561, 16563, 16560, 16564, 16562, 16558, 17623, 17624, 17620, 
+ 17625, 17622, 17618, 16578, 16577, 16574, 16579, 16580, 16573, 
+ 16533, 16535, 16540, 16534, 16536, 16539, 17591, 17592, 17588, 
+ 17593, 17590, 17586, 16550, 16549, 16555, 16552, 16551, 16554);
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
 
 -- Warrior Set
@@ -172,65 +237,3 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_HORDE_ARMOR, 0, 16552, 0, 0, 4072, 0),
 (@VENDOR_HORDE_ARMOR, 0, 16551, 0, 0, 4073, 0),
 (@VENDOR_HORDE_ARMOR, 0, 16554, 0, 0, 4074, 0);
-
-/*
-  Restore <Legacy Weapon Quartermaster> lvl 60 epic items
-  Lieutenant Jackspring (12784) (alliance)
-  Stone Guard Zarg  (12794) (horde)
-*/
-
-DELETE FROM `npc_vendor` WHERE (`entry` = @VENDOR_ALLIANCE_WEAPONS) AND `item` IN 
-(18825, 12584, 18827, 18838, 18865, 23456, 18833, 18836, 18855, 18830, 23451,
- 18869, 18873, 18876, 23455, 18843, 18847, 23451, 23454, 18847, 18847);
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
-
--- Epic Weapons Alliance
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18825, 0, 0, 4000, 0), -- Aegis
-(@VENDOR_ALLIANCE_WEAPONS, 0, 12584, 0, 0, 4001, 0), -- Longsword
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18827, 0, 0, 4002, 0), -- Handaxe
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18838, 0, 0, 4003, 0), -- Dirk
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18865, 0, 0, 4004, 0), -- Punisher
-(@VENDOR_ALLIANCE_WEAPONS, 0, 23456, 0, 0, 4005, 0), -- Swiftblade
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18833, 0, 0, 4006, 0), -- Bullseye
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18836, 0, 0, 4007, 0), -- Repeater
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18855, 0, 0, 4008, 0); -- Hand Cannon
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18830, 0, 0, 4009, 0), -- Sunderer
-(@VENDOR_ALLIANCE_WEAPONS, 0, 23451, 0, 0, 4010, 0), -- Battle Hammer
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18869, 0, 0, 4011, 0), -- Glaive
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18873, 0, 0, 4012, 0), -- Stave
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18876, 0, 0, 4013, 0), -- Claymore
-(@VENDOR_ALLIANCE_WEAPONS, 0, 23455, 0, 0, 4014, 0), -- Demolisher
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18843, 0, 0, 4015, 0), -- Right Hand Blade
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18847, 0, 0, 4016, 0), -- Left Hand Blade
-(@VENDOR_ALLIANCE_WEAPONS, 0, 23451, 0, 0, 4017, 0), -- Mageblade
-(@VENDOR_ALLIANCE_WEAPONS, 0, 23454, 0, 0, 4018, 0), -- Warhammer
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18847, 0, 0, 4019, 0), -- Tome of Power
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18847, 0, 0, 4020, 0); -- Tome of Restoration
-
-DELETE FROM `npc_vendor` WHERE (`entry` = @VENDOR_HORDE_WEAPONS) AND `item` IN 
-(18826, 16345, 18828, 18840, 18866, 23467, 18835, 18837, 18860, 18831, 18868,
- 18871, 18874, 18877, 23465, 18844, 18848, 23466, 23464, 23468, 23469);
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
-
--- Epic Horde
-(@VENDOR_HORDE_WEAPONS, 0, 18826, 0, 0, 4000, 0), -- Shield Wall
-(@VENDOR_HORDE_WEAPONS, 0, 16345, 0, 0, 4001, 0), -- Blade
-(@VENDOR_HORDE_WEAPONS, 0, 18828, 0, 0, 4002, 0), -- Cleaver
-(@VENDOR_HORDE_WEAPONS, 0, 18840, 0, 0, 4003, 0), -- Razor
-(@VENDOR_HORDE_WEAPONS, 0, 18866, 0, 0, 4004, 0), -- Bludgeon
-(@VENDOR_HORDE_WEAPONS, 0, 23467, 0, 0, 4005, 0), -- Quickblade
-(@VENDOR_HORDE_WEAPONS, 0, 18835, 0, 0, 4006, 0), -- Recurve
-(@VENDOR_HORDE_WEAPONS, 0, 18837, 0, 0, 4007, 0), -- Crossbow
-(@VENDOR_HORDE_WEAPONS, 0, 18860, 0, 0, 4008, 0); -- Street Sweeper
-(@VENDOR_HORDE_WEAPONS, 0, 18831, 0, 0, 4009, 0), -- Battle Axe
-(@VENDOR_HORDE_WEAPONS, 0, 18868, 0, 0, 4010, 0), -- Pulverizer
-(@VENDOR_HORDE_WEAPONS, 0, 18871, 0, 0, 4011, 0), -- Pig Sticker
-(@VENDOR_HORDE_WEAPONS, 0, 18874, 0, 0, 4012, 0), -- War Staff
-(@VENDOR_HORDE_WEAPONS, 0, 18877, 0, 0, 4013, 0), -- Greatsword
-(@VENDOR_HORDE_WEAPONS, 0, 23465, 0, 0, 4014, 0), -- Destroyer
-(@VENDOR_HORDE_WEAPONS, 0, 18844, 0, 0, 4015, 0), -- Right Claw
-(@VENDOR_HORDE_WEAPONS, 0, 18848, 0, 0, 4016, 0), -- Left Claw
-(@VENDOR_HORDE_WEAPONS, 0, 23466, 0, 0, 4017, 0), -- Spellblade
-(@VENDOR_HORDE_WEAPONS, 0, 23464, 0, 0, 4018, 0), -- Battle Mace
-(@VENDOR_HORDE_WEAPONS, 0, 23468, 0, 0, 4019, 0), -- Tome of Destruction
-(@VENDOR_HORDE_WEAPONS, 0, 23469, 0, 0, 4020, 0), -- Tome of Mending
