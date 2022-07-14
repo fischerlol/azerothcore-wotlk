@@ -28,7 +28,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_ALLIANCE_WEAPONS, 0, 23456, 0, 0, 4005, 0), -- Swiftblade
 (@VENDOR_ALLIANCE_WEAPONS, 0, 18833, 0, 0, 4006, 0), -- Bullseye
 (@VENDOR_ALLIANCE_WEAPONS, 0, 18836, 0, 0, 4007, 0), -- Repeater
-(@VENDOR_ALLIANCE_WEAPONS, 0, 18855, 0, 0, 4008, 0); -- Hand Cannon
+(@VENDOR_ALLIANCE_WEAPONS, 0, 18855, 0, 0, 4008, 0), -- Hand Cannon
 (@VENDOR_ALLIANCE_WEAPONS, 0, 18830, 0, 0, 4009, 0), -- Sunderer
 (@VENDOR_ALLIANCE_WEAPONS, 0, 23451, 0, 0, 4010, 0), -- Battle Hammer
 (@VENDOR_ALLIANCE_WEAPONS, 0, 18869, 0, 0, 4011, 0), -- Glaive
@@ -56,7 +56,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_HORDE_WEAPONS, 0, 23467, 0, 0, 4005, 0), -- Quickblade
 (@VENDOR_HORDE_WEAPONS, 0, 18835, 0, 0, 4006, 0), -- Recurve
 (@VENDOR_HORDE_WEAPONS, 0, 18837, 0, 0, 4007, 0), -- Crossbow
-(@VENDOR_HORDE_WEAPONS, 0, 18860, 0, 0, 4008, 0); -- Street Sweeper
+(@VENDOR_HORDE_WEAPONS, 0, 18860, 0, 0, 4008, 0), -- Street Sweeper
 (@VENDOR_HORDE_WEAPONS, 0, 18831, 0, 0, 4009, 0), -- Battle Axe
 (@VENDOR_HORDE_WEAPONS, 0, 18868, 0, 0, 4010, 0), -- Pulverizer
 (@VENDOR_HORDE_WEAPONS, 0, 18871, 0, 0, 4011, 0), -- Pig Sticker
@@ -68,7 +68,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR_HORDE_WEAPONS, 0, 23466, 0, 0, 4017, 0), -- Spellblade
 (@VENDOR_HORDE_WEAPONS, 0, 23464, 0, 0, 4018, 0), -- Battle Mace
 (@VENDOR_HORDE_WEAPONS, 0, 23468, 0, 0, 4019, 0), -- Tome of Destruction
-(@VENDOR_HORDE_WEAPONS, 0, 23469, 0, 0, 4020, 0), -- Tome of Mending
+(@VENDOR_HORDE_WEAPONS, 0, 23469, 0, 0, 4020, 0); -- Tome of Mending
 
 /*
   Restore <Legacy Armor Quartermaster> lvl 60 blue and epic items, do not delete the previous items lvl 50-59
