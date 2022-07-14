@@ -21,9 +21,9 @@ DELETE FROM `npc_vendor` WHERE (`entry` = @VENDOR_ALLIANCE) AND `item` IN
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
 
 -- Epic Weapons
-(@VENDOR_ALLIANCE, 0, 12584, 0, 0, 4000, 0), -- Aegis
+(@VENDOR_ALLIANCE, 0, 18825, 0, 0, 4000, 0), -- Aegis
 (@VENDOR_ALLIANCE, 0, 12584, 0, 0, 4001, 0), -- Longsword
-(@VENDOR_ALLIANCE, 0, 12584, 0, 0, 4002, 0), -- Handaxe
+(@VENDOR_ALLIANCE, 0, 18827, 0, 0, 4002, 0), -- Handaxe
 (@VENDOR_ALLIANCE, 0, 18838, 0, 0, 4003, 0), -- Dirk
 (@VENDOR_ALLIANCE, 0, 18865, 0, 0, 4004, 0), -- Punisher
 (@VENDOR_ALLIANCE, 0, 23456, 0, 0, 4005, 0), -- Swiftblade
