@@ -14,7 +14,7 @@
 #                     1 - Enabled
 #
 
-ModCTASwitch.Enable = 0
+ModCTASwitch.Enable = 1
 
 #
 #    ModCTASwitch.SwitchEots
@@ -23,6 +23,7 @@ ModCTASwitch.Enable = 0
 #        Description: When the Call to Arms! event starts, switch it to another one specified in this config.
 #
 
+ModCTASwitch.SwitchAV = 19
 ModCTASwitch.SwitchEots = 19
 ModCTASwitch.SwitchSota = 20
-ModCTASwitch.SwitchIoc = 18
+ModCTASwitch.SwitchIoc = 20
