@@ -247,7 +247,7 @@ struct boss_jeklik : public BossAI
                     Talk(EMOTE_GREAT_HEAL);
                     me->InterruptNonMeleeSpells(false);
                     DoCastSelf(SPELL_GREATER_HEAL);
-                    events.ScheduleEvent(EVENT_GREATER_HEAL, 25000, PHASE_TWO);
+                    events.ScheduleEvent(EVENT_GREATER_HEAL, 50000, PHASE_TWO);
                     break;
                 case EVENT_SPAWN_FLYING_BATS:
                     Talk(SAY_CALL_RIDERS);
