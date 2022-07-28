@@ -8,7 +8,7 @@
 class WobgobWorldDatabase : public DatabaseScript
 {
 public:
-    WobgobWorldDatabase() : DatabaseScript("ClassChangesDatabase") {}
+    WobgobWorldDatabase() : DatabaseScript("WobgobWorldDatabase") {}
 
     std::string path = "/modules/mod-wobgob-world/sql/";
     void OnAfterDatabasesLoaded(uint32 updateFlags) override
