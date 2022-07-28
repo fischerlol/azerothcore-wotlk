@@ -19,7 +19,7 @@ set @gear_base = 80000;
 -- Set extended cost variables (weapons)
 set @1h = 5003;
 set @2h = 5002;
-set @off-hand = 5000;
+set @off_hand = 5000;
 set @shield = 5001;
 set @ranged = 5004;
 
@@ -71,14 +71,14 @@ VALUES
     (@zaxle_entry_id, @weapon_base+6, @1h), -- Gavel
     (@zaxle_entry_id, @weapon_base+7, @1h), -- Slicer
     (@zaxle_entry_id, @weapon_base+8, @1h), -- Right Ripper
-    (@zaxle_entry_id, @weapon_base+9, @off-hand), -- Left Ripper
+    (@zaxle_entry_id, @weapon_base+9, @off_hand), -- Left Ripper
     (@zaxle_entry_id, @weapon_base+10, @ranged), -- Rifle
     (@zaxle_entry_id, @weapon_base+11, @ranged), -- Heavy Crossbow
     (@zaxle_entry_id, @weapon_base+12, @ranged), -- Touch of Defeat
     (@zaxle_entry_id, @weapon_base+13, @1h), -- Cleaver
     (@zaxle_entry_id, @weapon_base+14, @2h), -- Staff
     (@zaxle_entry_id, @weapon_base+15, @shield), -- Shield Wall
-    (@zaxle_entry_id, @weapon_base+16, @off-hand), -- Endgame
+    (@zaxle_entry_id, @weapon_base+16, @off_hand), -- Endgame
 
     -- Bloodthirsty Gladiator's Plate Set
     (@zaxle_entry_id, @gear_base, @slot_head),
