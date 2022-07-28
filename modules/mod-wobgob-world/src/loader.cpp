@@ -1,6 +1,6 @@
-void AddClassChangesScripts();
+void AddWobgobWorldScripts();
 
-void Addmod_class_changesScripts()
+void Addmod_wobgob_worldScripts()
 {
-    AddClassChangesScripts();
+    AddWobgobWorldScripts();
 }

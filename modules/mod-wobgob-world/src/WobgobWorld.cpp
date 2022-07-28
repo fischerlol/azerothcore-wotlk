@@ -5,12 +5,12 @@
 #include "AchievementMgr.h"
 #include "DBUpdater.h"
 
-class ClassChangesDatabase : public DatabaseScript
+class WobgobWorldDatabase : public DatabaseScript
 {
 public:
-    ClassChangesDatabase() : DatabaseScript("ClassChangesDatabase") {}
+    WobgobWorld() : DatabaseScript("WobgobWorldDatabase") {}
 
-    std::string path = "/modules/mod-class-changes/sql/";
+    std::string path = "/modules/mod-wobgob-world/sql/";
     void OnAfterDatabasesLoaded(uint32 updateFlags) override
     {
         if (DBUpdater<LoginDatabaseConnection>::IsEnabled(updateFlags))
@@ -36,7 +36,7 @@ public:
     }
 };
 
-void AddClassChangesScripts()
+void AddWobgobWorldScripts()
 {
-    new ClassChangesDatabase();
+    new WobgobWorldDatabase();
 }
