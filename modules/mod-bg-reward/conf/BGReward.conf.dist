@@ -38,7 +38,7 @@ Battleground.Reward.Enable = 1
 #       Default: 3
 #
 
-Battleground.Reward.WinnerTeam.Count = 2
+Battleground.Reward.WinnerTeam.Count = 3
 
 #
 #    Battleground.Reward.LoserTeam.Count
