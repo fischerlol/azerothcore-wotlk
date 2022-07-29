@@ -82,7 +82,7 @@ Transmogrification.NotAllowed = ""
 #
 #    For custom gold cost set ScaledCostModifier to 0.0 and CopperCost to what ever cost you want
 
-Transmogrification.ScaledCostModifier = 0
+Transmogrification.ScaledCostModifier = 1.0
 Transmogrification.CopperCost = 0
 
 #
@@ -100,7 +100,7 @@ Transmogrification.CopperCost = 0
 #        Description: Amount of tokens required
 #        Default:    1
 
-Transmogrification.RequireToken = 1
+Transmogrification.RequireToken = 0
 Transmogrification.TokenEntry = 37711
 Transmogrification.TokenAmount = 80
 
@@ -184,7 +184,7 @@ Transmogrification.TokenAmount = 80
 #        Default:    0
 
 Transmogrification.AllowPoor = 0
-Transmogrification.AllowCommon = 0
+Transmogrification.AllowCommon = 1
 Transmogrification.AllowUncommon = 1
 Transmogrification.AllowRare = 1
 Transmogrification.AllowEpic = 1
@@ -238,7 +238,7 @@ Transmogrification.MaxSets = 10
 Transmogrification.EnableSetInfo = 1
 Transmogrification.SetNpcText = 601084
 
-Transmogrification.SetCostModifier = 0
+Transmogrification.SetCostModifier = 3.0
 Transmogrification.SetCopperCost = 0
 
 #
