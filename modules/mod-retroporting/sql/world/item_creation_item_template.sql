@@ -82,7 +82,7 @@ set @material_leather = 8;
 set @requiredlevel = 60;
 set @itemlevel = 60;
 set @flags_heroic = 8;
-set @flags_default = 36864;
+set @flags_default = 32768;
 set @quality_epic = 4;
 
 -- bonding
