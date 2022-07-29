@@ -63,7 +63,7 @@ Transmogrification.TrackUnusableItems = 1
 Transmogrification.RetroActiveAppearances = 1
 Transmogrification.ResetRetroActiveAppearancesFlag = 0
 
-Transmogrification.EnableTransmogInfo = 1
+Transmogrification.EnableTransmogInfo = 0
 Transmogrification.TransmogNpcText = 601083
 
 Transmogrification.Allowed = ""
@@ -235,7 +235,7 @@ Transmogrification.IgnoreReqStats = 0
 Transmogrification.EnableSets = 1
 Transmogrification.MaxSets = 10
 
-Transmogrification.EnableSetInfo = 1
+Transmogrification.EnableSetInfo = 0
 Transmogrification.SetNpcText = 601084
 
 Transmogrification.SetCostModifier = 3.0
