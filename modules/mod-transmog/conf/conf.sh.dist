@@ -5,11 +5,11 @@
 #
 
 DB_CHARACTERS_CUSTOM_PATHS+=(
-	$TRANSM_PATH_ROOT"/data/sql/db-characters/"
+	$TRANSM_PATH_ROOT"/sql/db-characters/"
 )
 
 DB_WORLD_CUSTOM_PATHS+=(
-	$TRANSM_PATH_ROOT"/data/sql/db-world/"
+	$TRANSM_PATH_ROOT"/sql/db-world/"
 )
 
 #
@@ -17,10 +17,10 @@ DB_WORLD_CUSTOM_PATHS+=(
 #
 
 DB_CHARACTERS_UPDATE_PATHS+=(
-	$TRANSM_PATH_ROOT"/data/sql/updates/char/"
+	$TRANSM_PATH_ROOT"/sql/updates/char/"
 )
 
 DB_WORLD_UPDATE_PATHS+=(
-	$TRANSM_PATH_ROOT"/data/sql/updates/world/"
+	$TRANSM_PATH_ROOT"/sql/updates/world/"
 )
 
