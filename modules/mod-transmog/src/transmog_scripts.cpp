@@ -23,6 +23,7 @@ Cant transmogrify rediculus items // Foereaper: would be fun to stab people with
 #include "Transmogrification.h"
 #include "ScriptedCreature.h"
 #include "ItemTemplate.h"
+#include "DBUpdater.h"
 
 #define sT  sTransmogrification
 #define GTS session->GetAcoreString // dropped translation support, no one using?
@@ -751,6 +752,38 @@ public:
     }
 };
 
+
+class TransmogDatabase : public DatabaseScript
+{
+public:
+    TransmogDatabase() : DatabaseScript("TransmogDatabase") {}
+
+    std::string path = "/modules/mod-transmog/sql/";
+    void OnAfterDatabasesLoaded(uint32 updateFlags) override
+    {
+        if (DBUpdater<LoginDatabaseConnection>::IsEnabled(updateFlags))
+        {
+            std::vector<std::string> directories;
+            directories.push_back(path + "auth");
+            DBUpdater<LoginDatabaseConnection>::Update(LoginDatabase, &directories);
+        }
+
+        if (DBUpdater<CharacterDatabaseConnection>::IsEnabled(updateFlags))
+        {
+            std::vector<std::string> directories;
+            directories.push_back(path + "characters");
+            DBUpdater<CharacterDatabaseConnection>::Update(CharacterDatabase, &directories);
+        }
+
+        if (DBUpdater<WorldDatabaseConnection>::IsEnabled(updateFlags))
+        {
+            std::vector<std::string> directories;
+            directories.push_back(path + "world");
+            DBUpdater<WorldDatabaseConnection>::Update(WorldDatabase, &directories);
+        }
+    }
+};
+
 void AddSC_Transmog()
 {
     new global_transmog_script();
@@ -758,5 +791,6 @@ void AddSC_Transmog()
     new npc_transmogrifier();
     new PS_Transmogrification();
     new WS_Transmogrification();
+    new TransmogDatabase();
 }
 
