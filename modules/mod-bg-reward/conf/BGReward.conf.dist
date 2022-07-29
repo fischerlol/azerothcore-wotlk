@@ -29,13 +29,13 @@
 #        	     1  - (Enable)
 #
 
-Battleground.Reward.Enable = 0
+Battleground.Reward.Enable = 1
 
 #
 #    Battleground.Reward.WinnerTeam.Count
 #       Description: Reward count winner Battleground team.
 #
-#       Default: 2
+#       Default: 3
 #
 
 Battleground.Reward.WinnerTeam.Count = 2
