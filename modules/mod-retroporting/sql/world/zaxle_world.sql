@@ -135,7 +135,7 @@ VALUES
     -- Bloodthirsty Gladiator's Dreadplate Set
     (@zaxle_entry_id, @gear_base+42, @slot_head),
     (@zaxle_entry_id, @gear_base+43, @slot_shoulders),
-    (@zaxle_entry_id, @gear_base+34, @slot_chest),
+    (@zaxle_entry_id, @gear_base+44, @slot_chest),
     (@zaxle_entry_id, @gear_base+45, @slot_wrist),
     (@zaxle_entry_id, @gear_base+46, @slot_hands),
     (@zaxle_entry_id, @gear_base+47, @slot_waist),
