@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `HealthModifier` = '405' WHERE (`entry` = '14834');
