@@ -75,21 +75,26 @@ public:
     {
         npc_rinjiAI(Creature* creature) : npc_escortAI(creature)
         {
-            Reset();
+            Initialize();
             _IsByOutrunner = false;
             spawnId = 0;
         }
 
-        void Reset() override
+        void Initialize()
         {
             me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+            me->SetFaction(1948);
             postEventCount = 0;
             postEventTimer = 3000;
         }
 
+        void Reset() override
+        {
+            Initialize();
+        }
+
         void JustRespawned() override
         {
-            Reset();
             _IsByOutrunner = false;
             spawnId = 0;
 
@@ -139,6 +144,7 @@ public:
         void sQuestAccept(Player* player, Quest const* quest) override
         {
             me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+            me->SetFaction(126);
             if (quest->GetQuestId() == QUEST_RINJI_TRAPPED)
             {
                 if (GameObject* go = me->FindNearestGameObject(GO_RINJI_CAGE, INTERACTION_DISTANCE))
