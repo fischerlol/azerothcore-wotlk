@@ -568,8 +568,12 @@ public:
 
         uint32 scaledCurrentHealth = previousHealth && previousMaxHealth ? float(scaledHealth) / float(previousMaxHealth) * float(previousHealth) : 0;
 
-        creature->SetHealth(scaledCurrentHealth);
-        creature->UpdateAllStats();
+        static bool initialized;
+        if (!initialized) {
+            initialized = true;
+            creature->SetHealth(scaledCurrentHealth);
+            creature->UpdateAllStats();
+        }
     }
 };
 
