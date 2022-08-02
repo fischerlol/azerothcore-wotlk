@@ -75,19 +75,21 @@ public:
     {
         npc_rinjiAI(Creature* creature) : npc_escortAI(creature)
         {
+            Reset();
             _IsByOutrunner = false;
             spawnId = 0;
-            me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
         }
 
         void Reset() override
         {
+            me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
             postEventCount = 0;
             postEventTimer = 3000;
         }
 
         void JustRespawned() override
         {
+            Reset();
             _IsByOutrunner = false;
             spawnId = 0;
 
