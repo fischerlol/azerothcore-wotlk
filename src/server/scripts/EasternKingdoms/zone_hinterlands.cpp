@@ -83,7 +83,7 @@ public:
         void Initialize()
         {
             me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
-            me->SetFaction(1948);
+            me->SetFaction(35);
             postEventCount = 0;
             postEventTimer = 3000;
         }
