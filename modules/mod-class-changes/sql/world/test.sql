@@ -1,1 +1,1 @@
-UPDATE `creature_template` SET `HealthModifier` = '405' WHERE (`entry` = '14834');
+UPDATE `creature_template` SET `HealthModifier` = '270' WHERE (`entry` = '14834');
