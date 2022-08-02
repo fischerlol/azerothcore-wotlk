@@ -6,6 +6,5 @@
 
 void AddBracket_60_3_A_Scripts()
 {
-    if (!(sConfigMgr->GetOption<int>("ProgressionSystem.Brackets", 0) & PROGRESSION_BRACKET_60_TIER_3_A_ZUL_GURUB))
-        return;
+    return;
 }
