@@ -37,27 +37,44 @@ struct ClassSpells
     int RequiresQuest;
 };
 
-struct Proficiencies
-{
-    int ClassId;
-    int SpellId;
-    int RequiredLevel;
-};
-
 std::vector<ClassSpells> lsClassSpells;
-std::vector<Proficiencies> lsProficiencies;
 
 enum SpellType
 {
     CLASS = 0,
-    PROFICIENCY,
 };
 
+int warrior_proficiency[] =
+{
+    196,
+    197,
+    198,
+    199,
+    200,
+    201,
+    202,
+    227,
+    1180,
+    5011,
+    15590,
+    3127, //parry
+};
+    
 
 class npc_starter : public CreatureScript
 {
 public:
     npc_starter() : CreatureScript("npc_starter") {}
+
+    void LearnProficiency(Player* player, int proficiency[])
+    {
+
+        for (int i = 0; i < proficiency[i]; ++i)
+        {
+            if (!player->HasSpell(proficiency[i]))
+                player->learnSpell(proficiency[i]);
+        }
+    }
 
     void LoadClassSpells()
     {
@@ -90,34 +107,6 @@ public:
         LOG_INFO("server.loading", ">> Loaded {} class spells", i);
     }
 
-    void LoadProficiencies()
-    {
-        QueryResult result = WorldDatabase.Query("SELECT `class_id`, `spell_id`, `required_level` FROM `mod_learnspells` WHERE `type`={} ORDER BY `id` ASC", SpellType::PROFICIENCY);
-
-        if (!result)
-        {
-            LOG_INFO("server.loading", ">> Loaded 0 proficiencies. DB table `mod_learnspells` has no spells of type 2.");
-            return;
-        }
-
-        lsProficiencies.clear();
-
-        int i = 0;
-        do
-        {
-            Field* fields = result->Fetch();
-
-            lsProficiencies.push_back(Proficiencies());
-            lsProficiencies[i].ClassId = fields[0].Get<int32>();
-            lsProficiencies[i].SpellId = fields[1].Get<int32>();
-            lsProficiencies[i].RequiredLevel = fields[2].Get<int32>();
-
-            i++;
-        } while (result->NextRow());
-
-        LOG_INFO("server.loading", ">> Loaded {} proficiencies", i);
-    }
-
     void LearnSpellsForNewLevel(Player* player)
     {
         for (auto& classSpell : lsClassSpells)
@@ -131,17 +120,6 @@ public:
                         if (classSpell.RequiredSpellId == -1 || player->HasSpell(classSpell.RequiredSpellId))
                             if (!player->HasSpell(classSpell.SpellId))
                                 player->learnSpell(classSpell.SpellId);
-        }
-    }
-
-    void LearnProficienciesForNewLevel(Player* player)
-    {
-        for (auto& proficiency : lsProficiencies)
-        {
-            if (proficiency.ClassId == player->getClass())
-                if (player->getLevel() >= proficiency.RequiredLevel)
-                    if (!player->HasSpell(proficiency.SpellId))
-                        player->learnSpell(proficiency.SpellId);
         }
     }
 
@@ -165,10 +143,8 @@ public:
     void LearnSpells(Player* player)
     {
         LoadClassSpells();
-        LoadProficiencies();
         AddShamanTotems(player);
         LearnSpellsForNewLevel(player);
-        LearnProficienciesForNewLevel(player);
     }
 
     bool OnGossipHello(Player* player, Creature* creature)
@@ -272,6 +248,7 @@ public:
             case CLASS_WARRIOR:
                 player->AddItem(ITEM_CONTAINER, 1);
                 LearnSpells(player);
+                LearnProficiency(player, warrior_proficiency);
                 break;
             case CLASS_PALADIN:
                 player->AddItem(ITEM_CONTAINER + 1, 1);
