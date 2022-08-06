@@ -21,6 +21,8 @@
 // 5 man: 1 tank, 3 dps, 1 healer = 3 offensive units and 2 defensive units.
 const float Offence5M = 1 / 3.0f, Defence5M = 1 / 2.0f;
 
+#define BOSS_VAELASTRASZ    13020
+
 enum Spells
 {
     SPELL_LUCIFRON_CURSE = 19703,
@@ -569,10 +571,20 @@ public:
         uint32 scaledCurrentHealth = previousHealth && previousMaxHealth ? float(scaledHealth) / float(previousMaxHealth) * float(previousHealth) : 0;
 
         static bool initialized;
-        if (!initialized) {
-            initialized = true;
+        if (creatureInfo->entry = creature->GetEntry() == BOSS_VAELASTRASZ)
+        {
             creature->SetHealth(scaledCurrentHealth);
             creature->UpdateAllStats();
+            return;
+        }
+        else
+        {
+            if (!initialized)
+            {
+                initialized = true;
+                creature->SetHealth(scaledCurrentHealth);
+                creature->UpdateAllStats();
+            }
         }
     }
 };
