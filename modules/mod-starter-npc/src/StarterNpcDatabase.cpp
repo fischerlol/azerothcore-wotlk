@@ -1,0 +1,38 @@
+#include "ScriptMgr.h"
+#include "DBUpdater.h"
+
+class StarterNpcDatabase : public DatabaseScript
+{
+public:
+    StarterNpcDatabase() : DatabaseScript("StarterNpcDatabase") {}
+
+    std::string path = "/modules/mod-starter-npc/sql/";
+    void OnAfterDatabasesLoaded(uint32 updateFlags) override
+    {
+        if (DBUpdater<LoginDatabaseConnection>::IsEnabled(updateFlags))
+        {
+            std::vector<std::string> directories;
+            directories.push_back(path + "auth");
+            DBUpdater<LoginDatabaseConnection>::Update(LoginDatabase, &directories);
+        }
+
+        if (DBUpdater<CharacterDatabaseConnection>::IsEnabled(updateFlags))
+        {
+            std::vector<std::string> directories;
+            directories.push_back(path + "characters");
+            DBUpdater<CharacterDatabaseConnection>::Update(CharacterDatabase, &directories);
+        }
+
+        if (DBUpdater<WorldDatabaseConnection>::IsEnabled(updateFlags))
+        {
+            std::vector<std::string> directories;
+            directories.push_back(path + "world");
+            DBUpdater<WorldDatabaseConnection>::Update(WorldDatabase, &directories);
+        }
+    }
+};
+
+void AddStarterNpcDatabaseScripts()
+{
+    new StarterNpcDatabase();
+}
