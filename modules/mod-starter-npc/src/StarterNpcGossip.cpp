@@ -140,11 +140,11 @@ public:
         }
     }
 
-    void LearnSpells(Player* player)
+    void LearnSpells(Player* player, int player_class[])
     {
         LoadClassSpells();
-        AddShamanTotems(player);
         LearnSpellsForNewLevel(player);
+        LearnProficiency(player, player_class);
     }
 
     bool OnGossipHello(Player* player, Creature* creature)
@@ -247,40 +247,40 @@ public:
             {
             case CLASS_WARRIOR:
                 player->AddItem(ITEM_CONTAINER, 1);
-                LearnSpells(player);
-                LearnProficiency(player, warrior_proficiency);
+                LearnSpells(player, warrior_proficiency);
                 break;
             case CLASS_PALADIN:
                 player->AddItem(ITEM_CONTAINER + 1, 1);
-                LearnSpells(player);
+                LearnSpells(player, warrior_proficiency);
                 break;
             case CLASS_HUNTER:
                 player->AddItem(ITEM_CONTAINER + 2, 1);
-                LearnSpells(player);
+                LearnSpells(player, warrior_proficiency);
                 break;
             case CLASS_ROGUE:
                 player->AddItem(ITEM_CONTAINER + 3, 1);
-                LearnSpells(player);
+                LearnSpells(player, warrior_proficiency);
                 break;
             case CLASS_PRIEST:
                 player->AddItem(ITEM_CONTAINER + 4, 1);
-                LearnSpells(player);
+                LearnSpells(player, warrior_proficiency);
                 break;
             case CLASS_SHAMAN:
                 player->AddItem(ITEM_CONTAINER + 5, 1);
-                LearnSpells(player);
+                LearnSpells(player, warrior_proficiency);
+                AddShamanTotems(player);
                 break;
             case CLASS_MAGE:
                 player->AddItem(ITEM_CONTAINER + 6, 1);
-                LearnSpells(player);
+                LearnSpells(player, warrior_proficiency);
                 break;
             case CLASS_WARLOCK:
                 player->AddItem(ITEM_CONTAINER + 7, 1);
-                LearnSpells(player);
+                LearnSpells(player, warrior_proficiency);
                 break;
             case CLASS_DRUID:
                 player->AddItem(ITEM_CONTAINER + 8, 1);
-                LearnSpells(player);
+                LearnSpells(player, warrior_proficiency);
                 break;
             }
 
