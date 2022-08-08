@@ -79,6 +79,7 @@ set @intellect = 5;
 set @spirit = 6;
 set @stamina = 7;
 set @crit_rating = 32;
+set @attack_power = 38;
 set @block_value = 48;
 set @armor_weapon = 0;
 set @armor_mail_shoulders = 138;
@@ -105,8 +106,16 @@ set @armor_cloth_boots = 23;
 set @stat_count_armor = 3;
 set @stat_count_weapon = 2;
 
--- armor
+-- armor/weapon
+set @dmg_type1 = 0;
 set @itemlevel = 20;
+set @dmg_type1_arcane = 6;
+set @ammo_type_arrow= 2;
+set @ammo_type_bullet = 3;
+set @ammo_type_default = 0;
+set @block_default = 0;
+set @rangedmodrange_default = 0;
+set @rangedmodrange = 100;
 set @flags_default = 32768;
 
 -- container
@@ -168,7 +177,6 @@ BEGIN
       (entry, name, description, class, subclass, displayid, inventorytype, quality, itemlevel, flags, material, bonding, sellprice, statscount, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, armor);
 END//
 
-
 DROP PROCEDURE IF EXISTS `create_shoulders` //
 CREATE PROCEDURE create_shoulders(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN subclass TINYINT(3), IN displayid MEDIUMINT(7), IN flags INT(10), IN material TINYINT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5), IN armor SMALLINT(5))
 BEGIN
@@ -218,118 +226,105 @@ BEGIN
 END//
 
 DROP PROCEDURE IF EXISTS `create_weapon` //
-CREATE PROCEDURE create_weapon(IN entry MEDIUMINT(7), IN name VARCHAR(255),  IN description VARCHAR(255), IN class TINYINT(3), IN subclass TINYINT(3), IN displayid MEDIUMINT(7), IN inventorytype TINYINT(3), IN sheath TINYINT(3), IN quality TINYINT(3), IN itemlevel SMALLINT(5), IN flags INT(10), IN material TINYINT(10), IN bonding TINYINT(3), IN sellprice INT(10), IN statscount TINYINT(3), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5), IN armor SMALLINT(5))
+CREATE PROCEDURE create_weapon(IN entry MEDIUMINT(7), IN name VARCHAR(255),  IN description VARCHAR(255), IN class TINYINT(3), IN subclass TINYINT(3), IN displayid MEDIUMINT(7), IN inventorytype TINYINT(3), IN sheath TINYINT(3), IN quality TINYINT(3), IN itemlevel SMALLINT(5), IN flags INT(10), IN material TINYINT(10), IN bonding TINYINT(3), IN sellprice INT(10), IN statscount TINYINT(3), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN armor SMALLINT(5), IN dmg_type1 TINYINT(3), IN ammo_type SMALLINT(5), IN rangedmodrange SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN block MEDIUMINT(7), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    REPLACE INTO item_template(entry, name, description, class, subclass, displayid, inventorytype, sheath, quality, itemlevel, flags, material, bonding, sellprice, statscount, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, armor) VALUES
-      (entry, name, description, class, subclass, displayid, inventorytype, sheath, quality, itemlevel, flags, material, bonding, sellprice, statscount, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, armor);
+    REPLACE INTO item_template(entry, name, description, class, subclass, displayid, inventorytype, sheath, quality, itemlevel, flags, material, bonding, sellprice, statscount, stat_type1, stat_value1, armor, dmg_type1, dmg_min1, dmg_max1, delay, block, maxdurability, spellid_1, spelltrigger_1, ammo_type, rangedmodrange) VALUES
+      (entry, name, description, class, subclass, displayid, inventorytype, sheath, quality, itemlevel, flags, material, bonding, sellprice, statscount, stat_type1, stat_value1, armor, dmg_type1, dmg_min1, dmg_max1, delay, block, maxdurability, spellid_1, spelltrigger_1, ammo_type, rangedmodrange);
 END//
 
 DROP PROCEDURE IF EXISTS `create_two_hand_axe` //
-CREATE PROCEDURE create_two_hand_axe(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
+CREATE PROCEDURE create_two_hand_axe(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    CALL create_weapon(entry, name, description, @class_weapon, @subclass_axe_two_hand, displayid, @inventorytype_two_hand, @sheath_two_hand_weapon, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
+    CALL create_weapon(entry, name, description, @class_weapon, @subclass_axe_two_hand, displayid, @inventorytype_two_hand, @sheath_two_hand_weapon, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, @armor_weapon, @dmg_type1, @ammo_type_default, @rangedmodrange_default, dmg_min1, dmg_max1, delay, @block_default, maxdurability, spellid_1, spelltrigger_1);
 END//
 
 DROP PROCEDURE IF EXISTS `create_two_hand_mace` //
-CREATE PROCEDURE create_two_hand_mace(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
+CREATE PROCEDURE create_two_hand_mace(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    CALL create_weapon(entry, name, description, @class_weapon, @sublcass_mace_two_hand, displayid, @inventorytype_two_hand, @sheath_two_hand_weapon, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
+    CALL create_weapon(entry, name, description, @class_weapon, @sublcass_mace_two_hand, displayid, @inventorytype_two_hand, @sheath_two_hand_weapon, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, @armor_weapon, @dmg_type1, @ammo_type_default, @rangedmodrange_default, dmg_min1, dmg_max1, delay, @block_default, maxdurability, spellid_1, spelltrigger_1);
 END//
 
 DROP PROCEDURE IF EXISTS `create_two_hand_sword` //
-CREATE PROCEDURE create_two_hand_sword(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
+CREATE PROCEDURE create_two_hand_sword(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    CALL create_weapon(entry, name, description, @class_weapon, @subclass_sword_two_hand, displayid, @inventorytype_two_hand, @sheath_two_hand_weapon, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
+    CALL create_weapon(entry, name, description, @class_weapon, @subclass_sword_two_hand, displayid, @inventorytype_two_hand, @sheath_two_hand_weapon, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, @armor_weapon, @dmg_type1, @ammo_type_default, @rangedmodrange_default, dmg_min1, dmg_max1, delay, @block_default, maxdurability, spellid_1, spelltrigger_1);
 END//
 
 DROP PROCEDURE IF EXISTS `create_one_hand_dagger` //
-CREATE PROCEDURE create_one_hand_dagger(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
+CREATE PROCEDURE create_one_hand_dagger(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    CALL create_weapon(entry, name, description, @class_weapon, @subclass_dagger, displayid, @inventorytype_one_hand, @sheath_one_handed, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
+    CALL create_weapon(entry, name, description, @class_weapon, @subclass_dagger, displayid, @inventorytype_one_hand, @sheath_one_handed, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, @armor_weapon, @dmg_type1, @ammo_type_default, @rangedmodrange_default, dmg_min1, dmg_max1, delay, @block_default, maxdurability, spellid_1, spelltrigger_1);
 END//
 
 DROP PROCEDURE IF EXISTS `create_one_hand_mace` //
-CREATE PROCEDURE create_one_hand_mace(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
+CREATE PROCEDURE create_one_hand_mace(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    CALL create_weapon(entry, name, description, @class_weapon, @subclass_mace_one_hand, displayid, @inventorytype_one_hand, @sheath_one_handed, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
+    CALL create_weapon(entry, name, description, @class_weapon, @subclass_mace_one_hand, displayid, @inventorytype_one_hand, @sheath_one_handed, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, @armor_weapon, @dmg_type1, @ammo_type_default, @rangedmodrange_default, dmg_min1, dmg_max1, delay, @block_default, maxdurability, spellid_1, spelltrigger_1);
 END//
 
 DROP PROCEDURE IF EXISTS `create_one_hand_sword` //
-CREATE PROCEDURE create_one_hand_sword(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
+CREATE PROCEDURE create_one_hand_sword(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    CALL create_weapon(entry, name, description, @class_weapon, @subclass_sword_one_hand, displayid, @inventorytype_one_hand, @sheath_one_handed, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
+    CALL create_weapon(entry, name, description, @class_weapon, @subclass_sword_one_hand, displayid, @inventorytype_one_hand, @sheath_one_handed, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, @armor_weapon, @dmg_type1, @ammo_type_default, @rangedmodrange_default, dmg_min1, dmg_max1, delay, @block_default, maxdurability, spellid_1, spelltrigger_1);
 END//
 
 DROP PROCEDURE IF EXISTS `create_one_hand_axe` //
-CREATE PROCEDURE create_one_hand_axe(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
+CREATE PROCEDURE create_one_hand_axe(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    CALL create_weapon(entry, name, description, @class_weapon, @subclass_axe_one_hand, displayid, @inventorytype_one_hand, @sheath_one_handed, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
+    CALL create_weapon(entry, name, description, @class_weapon, @subclass_axe_one_hand, displayid, @inventorytype_one_hand, @sheath_one_handed, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, @armor_weapon, @dmg_type1, @ammo_type_default, @rangedmodrange_default, dmg_min1, dmg_max1, delay, @block_default, maxdurability, spellid_1, spelltrigger_1);
 END//
 
 DROP PROCEDURE IF EXISTS `create_staff` //
-CREATE PROCEDURE create_staff (IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
+CREATE PROCEDURE create_staff (IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    CALL create_weapon(entry, name, description, @class_weapon, @subclass_staff, displayid, @inventorytype_two_hand, @sheath_staff, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
+    CALL create_weapon(entry, name, description, @class_weapon, @subclass_staff, displayid, @inventorytype_two_hand, @sheath_staff, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, @armor_weapon, @dmg_type1, @ammo_type_default, @rangedmodrange_default, dmg_min1, dmg_max1, delay, @block_default, maxdurability, spellid_1, spelltrigger_1);
 END//
 
 DROP PROCEDURE IF EXISTS `create_wand` //
-CREATE PROCEDURE create_wand(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
+CREATE PROCEDURE create_wand(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    CALL create_weapon(entry, name, description, @class_weapon, @subclass_wand, displayid, @inventorytype_ranged, @sheath_ranged_and_frill, @quality, @itemlevel, flags, @material_wood, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
+    CALL create_weapon(entry, name, description, @class_weapon, @subclass_wand, displayid, @inventorytype_ranged, @sheath_ranged_and_frill, @quality, @itemlevel, flags, @material_wood, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, @armor_weapon, @dmg_type1_arcane, @ammo_type_default, @rangedmodrange, dmg_min1, dmg_max1, delay, @block_default, maxdurability, spellid_1, spelltrigger_1);
 END//
 
 DROP PROCEDURE IF EXISTS `create_gun` //
-CREATE PROCEDURE create_gun(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
+CREATE PROCEDURE create_gun(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    CALL create_weapon(entry, name, description, @class_weapon, @subclass_gun, displayid, @inventorytype_ranged, @sheath_ranged_and_frill, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
-END//
-
-DROP PROCEDURE IF EXISTS `create_crossbow` //
-CREATE PROCEDURE create_crossbow(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
-BEGIN
-    CALL create_weapon(entry, name, description, @class_weapon, @subclass_crossbow, displayid, @inventorytype_ranged, @sheath_ranged_and_frill, @quality, @itemlevel, flags, @material_wood, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
+    CALL create_weapon(entry, name, description, @class_weapon, @subclass_gun, displayid, @inventorytype_ranged, @sheath_ranged_and_frill, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, @armor_weapon, @dmg_type1, @ammo_type_bullet, @rangedmodrange, dmg_min1, dmg_max1, delay, @block_default, maxdurability, spellid_1, spelltrigger_1);
 END//
 
 DROP PROCEDURE IF EXISTS `create_bow` //
-CREATE PROCEDURE create_bow(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
+CREATE PROCEDURE create_bow(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    CALL create_weapon(entry, name, description, @class_weapon, @subclass_bow, displayid, @inventorytype_bow, @sheath_ranged_and_frill, @quality, @itemlevel, flags, @material_wood, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
+    CALL create_weapon(entry, name, description, @class_weapon, @subclass_bow, displayid, @inventorytype_bow, @sheath_ranged_and_frill, @quality, @itemlevel, flags, @material_wood, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, @armor_weapon, @dmg_type1, @ammo_type_arrow, @rangedmodrange, dmg_min1, dmg_max1, delay, @block_default, maxdurability, spellid_1, spelltrigger_1);
 END//
 
 DROP PROCEDURE IF EXISTS `create_off_hand_weapon` //
-CREATE PROCEDURE create_off_hand_weapon(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
+CREATE PROCEDURE create_off_hand_weapon(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    CALL create_weapon(entry, name, description, @class_weapon, subclass, displayid, @inventorytype_off_hand, @sheath_one_handed, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
-END//
-
-DROP PROCEDURE IF EXISTS `create_off_hand_frill` //
-CREATE PROCEDURE create_off_hand_frill(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5))
-BEGIN
-    CALL create_weapon(entry, name, description, @class_armor, @subclass_miscellaneous, displayid, @inventorytype_holdable, @sheath_ranged_and_frill, @quality, @itemlevel, flags, @material_liquid, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, @armor_weapon);
+    CALL create_weapon(entry, name, description, @class_weapon, subclass, displayid, @inventorytype_off_hand, @sheath_one_handed, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, @armor_weapon, @dmg_type1, @ammo_type_default, @rangedmodrange_default, dmg_min1, dmg_max1, delay, @block_default, maxdurability, spellid_1, spelltrigger_1);
 END//
 
 DROP PROCEDURE IF EXISTS `create_shield` //
-CREATE PROCEDURE create_shield(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5), IN armor SMALLINT(5))
+CREATE PROCEDURE create_shield(IN entry MEDIUMINT(7), IN name VARCHAR(255), IN description VARCHAR(255), IN displayid MEDIUMINT(7), IN flags INT(10), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN armor SMALLINT(5), IN dmg_min1 FLOAT, IN dmg_max1 FLOAT, IN delay SMALLINT(5), IN block MEDIUMINT(7), IN maxdurability SMALLINT(5), IN spellid_1 MEDIUMINT(7), IN spelltrigger_1 TINYINT(3))
 BEGIN
-    CALL create_weapon(entry, name, description, @class_armor, @subclass_shield, displayid, @inventorytype_shield, @sheath_shield, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, armor);
+    CALL create_weapon(entry, name, description, @class_armor, @subclass_shield, displayid, @inventorytype_shield, @sheath_shield, @quality, @itemlevel, flags, @material_metal, @bind_on_pickup, @sell_price, @stat_count_weapon, stat_type1, stat_value1, armor, @dmg_type1, @ammo_type_default, @rangedmodrange_default, dmg_min1, dmg_max1, delay, block, maxdurability, spellid_1, spelltrigger_1);
 END//
 
 DELIMITER ;
 
 -- Weapons
-CALL create_two_hand_axe(@base_item_weapon, "Initiate's Battleaxe", '', @base_item_weapon, @flags_default, 0, 3, 0, 3, 0, 3);
-CALL create_two_hand_sword(@base_item_weapon+1, "Initiate's Greatsword", '', @base_item_weapon+1, @flags_default, 0, 3, 0, 3, 0, 3);
-CALL create_two_hand_mace(@base_item_weapon+2, "Initiate's Hammer", '', @base_item_weapon+2, @flags_default, 0, 3, 0, 3, 0, 3);
-CALL create_one_hand_dagger(@base_item_weapon+3, "Initiate's Dagger", '', @base_item_weapon+3, @flags_default, 0, 3, 0, 3, 0, 3);
-call create_bow(@base_item_weapon+4, "Initiate's Shortbow", '', @base_item_weapon+4, @flags_default, 0, 3, 0, 3, 0, 3);
-call create_one_hand_mace(@base_item_weapon+5, "Initiate's Mace", '', @base_item_weapon+5, @flags_default, 0, 3, 0, 3, 0, 3);
-call create_one_hand_sword(@base_item_weapon+6, "Initiate's Shortsword", '', @base_item_weapon+6, @flags_default, 0, 3, 0, 3, 0, 3);
-call create_crossbow(@base_item_weapon+7, "Initiate's Crossbow", '', @base_item_weapon+7, @flags_default, 0, 3, 0, 3, 0, 3);
-call create_wand(@base_item_weapon+8, "Initiate's Wand", '', @base_item_weapon+8, @flags_default, 0, 3, 0, 3, 0, 3);
-call create_one_hand_axe(@base_item_weapon+9, "Initiate's Axe", '', @base_item_weapon+9, @flags_default, 0, 3, 0, 3, 0, 3);
-call create_staff(@base_item_weapon+10, "Initiate's Staff", '', @base_item_weapon+10, @flags_default, 0, 3, 0, 3, 0, 3);
-call create_shield(@base_item_weapon+11, "Initiate's Wooden Shield", '', @base_item_weapon+11, @flags_default, 0, 3, 0, 3, 0, 3, 471);
-call create_gun(@base_item_weapon+12, "Initiate's Blunderbuss", '', @base_item_weapon+12, @flags_default, 0, 3, 0, 3, 0, 3);
+CALL create_two_hand_axe(@base_item_weapon, "Initiate's Battleaxe", '', @base_item_weapon, @flags_default, @crit_rating, 5, 51, 77, 3800, 75, 9136, 1);
+CALL create_two_hand_sword(@base_item_weapon+1, "Initiate's Greatsword", '', @base_item_weapon+1, @flags_default, @crit_rating, 5, 51, 77, 3800, 75, 9136, 1);
+call create_bow(@base_item_weapon+2, "Initiate's Shortbow", '', @base_item_weapon+2, @flags_default, @crit_rating, 1, 25, 47, 2800, 75, 9136, 1);
+call create_one_hand_mace(@base_item_weapon+3, "Initiate's Mace", '', @base_item_weapon+3, @flags_default, @crit_rating, 5, 24, 45, 2700, 75, 9396, 1);
+call create_one_hand_sword(@base_item_weapon+4, "Initiate's Shortsword", '', @base_item_weapon+4, @flags_default, @crit_rating, 2, 25, 47, 2800, 75, 9136, 1);
+call create_wand(@base_item_weapon+5, "Initiate's Wand", '', @base_item_weapon+5, @flags_default, @crit_rating, 2, 25, 39, 1600, 75, 0, 0);
+call create_one_hand_axe(@base_item_weapon+6, "Initiate's Axe", '', @base_item_weapon+6, @flags_default, @crit_rating, 2, 25, 47, 2800, 75, 9136, 1);
+call create_staff(@base_item_weapon+7, "Initiate's Staff", '', @base_item_weapon+7, @flags_default, @crit_rating, 5, 51, 77, 3800, 75, 9417, 1);
+call create_staff(@base_item_weapon+8, "Initiate's Battle Staff", '', @base_item_weapon+8, @flags_default, @crit_rating, 5, 51, 77, 3800, 75, 9136, 1);
+call create_shield(@base_item_weapon+9, "Initiate's Wooden Shield", '', @base_item_weapon+9, @flags_default, @block_value, 0, 471, 0, 0, 0, 9, 75, 9396, 1);
+call create_shield(@base_item_weapon+10, "Initiate's Wooden Buckler", '', @base_item_weapon+10, @flags_default, @block_value, 0, 471, 0, 0, 0, 9, 75, 7517, 1);
+call create_gun(@base_item_weapon+11, "Initiate's Blunderbuss", '', @base_item_weapon+11, @flags_default, @crit_rating, 1, 25, 47, 2800, 75, 9136, 1);
 
 /*
 * Warrior
