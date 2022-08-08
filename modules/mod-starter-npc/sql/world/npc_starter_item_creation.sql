@@ -78,6 +78,8 @@ set @strength = 4;
 set @intellect = 5;
 set @spirit = 6;
 set @stamina = 7;
+set @crit_rating = 32;
+set @block_value = 48;
 set @armor_weapon = 0;
 set @armor_mail_shoulders = 138;
 set @armor_mail_chest = 184;
@@ -158,7 +160,6 @@ CREATE PROCEDURE create_item_container(IN entry MEDIUMINT(70), IN displayid MEDI
 BEGIN
     CALL create_item_template(entry, displayid, @container_name, @container_description, @class_container, @subclass_miscellaneous, @inventorytype_non_equip, @quality, @flags_container, @material_wood, @bind_on_pickup, @sell_price);
 END//
-
 
 DROP PROCEDURE IF EXISTS `create_armor` //
 CREATE PROCEDURE create_armor(IN entry MEDIUMINT(7), IN name VARCHAR(255),  IN description VARCHAR(255), IN class TINYINT(3), IN subclass TINYINT(3), IN displayid MEDIUMINT(7), IN inventorytype TINYINT(3), IN quality TINYINT(3), IN itemlevel SMALLINT(5), IN flags INT(10), IN material TINYINT(10), IN bonding TINYINT(3), IN sellprice INT(10), IN statscount TINYINT(3), IN stat_type1 TINYINT(3), IN stat_value1 SMALLINT(5), IN stat_type2 TINYINT(3), in stat_value2 SMALLINT(5), IN stat_type3 TINYINT(3), IN stat_value3 SMALLINT(5), IN armor SMALLINT(5)) 
