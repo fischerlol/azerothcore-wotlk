@@ -120,7 +120,7 @@ set @group_id = 0;
 set @reference = 0;
 set @comment = "";
 set @container_description = "Includes everything that a new recruit needs to get started";
-set @container_name = "Initiate's supplies";
+set @container_name = "Initiate's Supplies";
 
 -- other
 set @quality = 2;
