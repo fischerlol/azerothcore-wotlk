@@ -37,42 +37,163 @@ struct ClassSpells
     int RequiresQuest;
 };
 
+struct Proficiencies
+{
+    int ClassId;
+    int SpellId;
+    int RequiredLevel;
+};
+
 std::vector<ClassSpells> lsClassSpells;
+std::vector<Proficiencies> lsProficiencies;
 
 enum SpellType
 {
     CLASS = 0,
+    PROFICIENCY,
 };
 
-int warrior_proficiency[] =
+enum EquipmentSlotsStarter
 {
-    196,
-    197,
-    198,
-    199,
-    200,
-    201,
-    202,
-    227,
-    1180,
-    5011,
-    15590,
-    3127, //parry
+    STARTER_EQUIPMENT_SLOT_LEGS = 6,
+    STARTER_EQUIPMENT_SLOT_FEET = 7,
+    STARTER_EQUIPMENT_SLOT_MAINHAND = 15,
+    STARTER_EQUIPMENT_SLOT_OFFHAND = 16,
+    STARTER_EQUIPMENT_SLOT_RANGED = 17,
 };
-    
 
-class npc_starter : public CreatureScript
+class DestroyGear
 {
 public:
-    npc_starter() : CreatureScript("npc_starter") {}
-
-    void LearnProficiency(Player* player, int proficiency[])
+    void DestroyArmor(Player* player)
     {
-
-        for (int i = 0; i < proficiency[i]; ++i)
+        for (uint8 i = STARTER_EQUIPMENT_SLOT_LEGS; i < STARTER_EQUIPMENT_SLOT_FEET+1; ++i)
         {
-            if (!player->HasSpell(proficiency[i]))
-                player->learnSpell(proficiency[i]);
+            if (Item* haveItemEquipped = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            {
+                if (haveItemEquipped)
+                {
+                    player->DestroyItemCount(haveItemEquipped->GetEntry(), 1, true, true);
+
+                    if (haveItemEquipped->IsInWorld())
+                    {
+                        haveItemEquipped->RemoveFromWorld();
+                        haveItemEquipped->DestroyForPlayer(player);
+                    }
+
+                    haveItemEquipped->SetUInt64Value(ITEM_FIELD_CONTAINED, 0);
+                    haveItemEquipped->SetSlot(NULL_SLOT);
+                    haveItemEquipped->SetState(ITEM_REMOVED, player);
+                }
+            }
+        }
+    }
+
+    void DestroyWeapons(Player* player)
+    {
+        for (uint8 i = STARTER_EQUIPMENT_SLOT_MAINHAND; i < STARTER_EQUIPMENT_SLOT_RANGED+1; ++i)
+        {
+            if (Item* haveItemEquipped = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            {
+                if (haveItemEquipped)
+                {
+                    player->DestroyItemCount(haveItemEquipped->GetEntry(), 1, true, true);
+
+                    if (haveItemEquipped->IsInWorld())
+                    {
+                        haveItemEquipped->RemoveFromWorld();
+                        haveItemEquipped->DestroyForPlayer(player);
+                    }
+
+                    haveItemEquipped->SetUInt64Value(ITEM_FIELD_CONTAINED, 0);
+                    haveItemEquipped->SetSlot(NULL_SLOT);
+                    haveItemEquipped->SetState(ITEM_REMOVED, player);
+                }
+            }
+        }
+    }
+
+    void DestroyAll(Player* player)
+    {
+        DestroyWeapons(player);
+        DestroyArmor(player);
+    }
+};
+
+class LearnSpells
+{
+public:
+    void LearnAllSpells(Player* player)
+    {
+        LearnSpellsForNewLevel(player);
+        LearnProficienciesForNewLevel(player);
+
+        if (player->getClass() == CLASS_SHAMAN)
+            AddShamanTotems(player);
+    }
+
+    void LearnSpellsForNewLevel(Player* player)
+    {
+        for (auto& classSpell : lsClassSpells)
+        {
+            if (classSpell.RequiresQuest == 1)
+                continue;
+
+            if (classSpell.RaceId == -1 || classSpell.RaceId == player->getRace())
+                if (classSpell.ClassId == player->getClass())
+                    if (player->getLevel() >= classSpell.RequiredLevel)
+                        if (classSpell.RequiredSpellId == -1 || player->HasSpell(classSpell.RequiredSpellId))
+                            if (!player->HasSpell(classSpell.SpellId))
+                                player->learnSpell(classSpell.SpellId);
+        }
+    }
+
+    void LearnProficienciesForNewLevel(Player* player)
+    {
+        for (auto& proficiency : lsProficiencies)
+        {
+            if (proficiency.ClassId == player->getClass())
+                if (player->getLevel() >= proficiency.RequiredLevel)
+                    if (!player->HasSpell(proficiency.SpellId))
+                        player->learnSpell(proficiency.SpellId);
+        }
+    }
+
+    void AddShamanTotems(Player* player)
+    {
+        uint32 totems[4][3] = {
+            {5175, 2, 4}, // Earth Totem, TotemCategory 2, Level 4
+            {5176, 4, 10}, // Fire Totem, TotemCategory 4, Level 10
+            {5177, 5, 20}, // Water Totem, TotemCategory 5, Level 20
+            {5178, 3, 30} // Air Totem, TotemCategory 3, Level 30
+        };
+
+        for (int i = 0; i <= 3; i++)
+        {
+            if (player->getLevel() >= totems[i][2])
+                if (!player->HasItemTotemCategory(totems[i][1]))
+                    player->AddItem(totems[i][0], 1);
+        }
+    }
+};
+
+class LearnSpellsData : public WorldScript
+{
+public:
+    LearnSpellsData() : WorldScript("LearnSpellsData") { }
+
+public:
+    void OnStartup() override
+    {
+        LoadSpells();
+    }
+
+    void LoadSpells()
+    {
+        LOG_INFO("server.loading", "Loading spells...");
+        {
+            LoadClassSpells();
+            LoadProficiencies();
         }
     }
 
@@ -107,45 +228,44 @@ public:
         LOG_INFO("server.loading", ">> Loaded {} class spells", i);
     }
 
-    void LearnSpellsForNewLevel(Player* player)
+    void LoadProficiencies()
     {
-        for (auto& classSpell : lsClassSpells)
+        QueryResult result = WorldDatabase.Query("SELECT `class_id`, `spell_id`, `required_level` FROM `mod_learnspells` WHERE `type`= 2 ORDER BY `id` ASC", SpellType::PROFICIENCY);
+
+        if (!result)
         {
-            if (classSpell.RequiresQuest == 1)
-                continue;
-
-            if (classSpell.RaceId == -1 || classSpell.RaceId == player->getRace())
-                if (classSpell.ClassId == player->getClass())
-                    if (player->getLevel() >= classSpell.RequiredLevel)
-                        if (classSpell.RequiredSpellId == -1 || player->HasSpell(classSpell.RequiredSpellId))
-                            if (!player->HasSpell(classSpell.SpellId))
-                                player->learnSpell(classSpell.SpellId);
+            LOG_INFO("server.loading", ">> Loaded 0 proficiencies. DB table `mod_learnspells` has no spells of type 2.");
+            return;
         }
-    }
 
-    void AddShamanTotems(Player* player)
-    {
-        uint32 totems[4][3] = {
-            {5175, 2, 4}, // Earth Totem, TotemCategory 2, Level 4
-            {5176, 4, 10}, // Fire Totem, TotemCategory 4, Level 10
-            {5177, 5, 20}, // Water Totem, TotemCategory 5, Level 20
-            {5178, 3, 30} // Air Totem, TotemCategory 3, Level 30
-        };
+        lsProficiencies.clear();
 
-        for (int i = 0; i <= 3; i++)
+        int i = 0;
+        do
         {
-            if (player->getLevel() >= totems[i][2])
-                if (!player->HasItemTotemCategory(totems[i][1]))
-                    player->AddItem(totems[i][0], 1);
-        }
+            Field* fields = result->Fetch();
+
+            lsProficiencies.push_back(Proficiencies());
+            lsProficiencies[i].ClassId = fields[0].Get<int32>();
+            lsProficiencies[i].SpellId = fields[1].Get<int32>();
+            lsProficiencies[i].RequiredLevel = fields[2].Get<int32>();
+
+            i++;
+        } while (result->NextRow());
+
+        LOG_INFO("server.loading", ">> Loaded {} proficiencies", i);
     }
 
-    void LearnSpells(Player* player, int player_class[])
-    {
-        LoadClassSpells();
-        LearnSpellsForNewLevel(player);
-        LearnProficiency(player, player_class);
-    }
+   
+};
+
+class NpcStarter : public CreatureScript
+{
+public:
+    NpcStarter() : CreatureScript("NpcStarter") {}
+
+    LearnSpells s;
+    DestroyGear d;
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
@@ -241,46 +361,46 @@ public:
         }
         else if (action == GOSSIP_OPTION_BOOST + 1)
         {
+            d.DestroyAll(player);
             player->GiveLevel(15);
 
             switch (player->getClass())
             {
             case CLASS_WARRIOR:
                 player->AddItem(ITEM_CONTAINER, 1);
-                LearnSpells(player, warrior_proficiency);
+                s.LearnAllSpells(player);
                 break;
             case CLASS_PALADIN:
                 player->AddItem(ITEM_CONTAINER + 1, 1);
-                LearnSpells(player, warrior_proficiency);
+                s.LearnAllSpells(player);
                 break;
             case CLASS_HUNTER:
                 player->AddItem(ITEM_CONTAINER + 2, 1);
-                LearnSpells(player, warrior_proficiency);
+                s.LearnAllSpells(player);
                 break;
             case CLASS_ROGUE:
                 player->AddItem(ITEM_CONTAINER + 3, 1);
-                LearnSpells(player, warrior_proficiency);
+                s.LearnAllSpells(player);
                 break;
             case CLASS_PRIEST:
                 player->AddItem(ITEM_CONTAINER + 4, 1);
-                LearnSpells(player, warrior_proficiency);
+                s.LearnAllSpells(player);
                 break;
             case CLASS_SHAMAN:
                 player->AddItem(ITEM_CONTAINER + 5, 1);
-                LearnSpells(player, warrior_proficiency);
-                AddShamanTotems(player);
+                s.LearnAllSpells(player);
                 break;
             case CLASS_MAGE:
                 player->AddItem(ITEM_CONTAINER + 6, 1);
-                LearnSpells(player, warrior_proficiency);
+                s.LearnAllSpells(player);
                 break;
             case CLASS_WARLOCK:
                 player->AddItem(ITEM_CONTAINER + 7, 1);
-                LearnSpells(player, warrior_proficiency);
+                s.LearnAllSpells(player);
                 break;
             case CLASS_DRUID:
                 player->AddItem(ITEM_CONTAINER + 8, 1);
-                LearnSpells(player, warrior_proficiency);
+                s.LearnAllSpells(player);
                 break;
             }
 
@@ -293,6 +413,7 @@ public:
 
 void AddStarterNpcGossipScripts()
 {
-    new npc_starter();
+    new NpcStarter();
+    new LearnSpellsData();
 }
 
