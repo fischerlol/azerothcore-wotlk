@@ -259,17 +259,78 @@ public:
    
 };
 
+class AddGear
+{
+public:
+    void AddEquipment(Player* player)
+    {
+        LearnSpells s;
+
+        switch (player->getClass())
+        {
+        case CLASS_WARRIOR:
+            if (player->getRace() == RACE_ORC)
+                player->AddItem(ITEM_CONTAINER + 1, 1);
+            if (player->getRace() == RACE_TAUREN || RACE_DWARF)
+                player->AddItem(ITEM_CONTAINER + 2, 1);
+            player->AddItem(ITEM_CONTAINER, 1);
+            s.LearnAllSpells(player);
+            break;
+        case CLASS_PALADIN:
+            player->AddItem(ITEM_CONTAINER + 4, 1);
+            s.LearnAllSpells(player);
+            break;
+        case CLASS_HUNTER:
+            if (player->getRace() == RACE_TAUREN || RACE_DWARF)
+                player->AddItem(ITEM_CONTAINER + 6, 1);
+            player->AddItem(ITEM_CONTAINER + 5, 1);
+            s.LearnAllSpells(player);
+            break;
+        case CLASS_ROGUE:
+            if (player->getRace() == RACE_ORC)
+                player->AddItem(ITEM_CONTAINER + 8, 1);
+            if (player->getRace() == RACE_DWARF)
+                player->AddItem(ITEM_CONTAINER + 9, 1);
+            player->AddItem(ITEM_CONTAINER + 7, 1);
+            s.LearnAllSpells(player);
+            break;
+        case CLASS_PRIEST:
+            player->AddItem(ITEM_CONTAINER + 10, 1);
+            s.LearnAllSpells(player);
+            break;
+        case CLASS_SHAMAN:
+            player->AddItem(ITEM_CONTAINER + 11, 1);
+            s.LearnAllSpells(player);
+            break;
+        case CLASS_MAGE:
+            player->AddItem(ITEM_CONTAINER + 12, 1);
+            s.LearnAllSpells(player);
+            break;
+        case CLASS_WARLOCK:
+            player->AddItem(ITEM_CONTAINER + 13, 1);
+            s.LearnAllSpells(player);
+            break;
+        case CLASS_DRUID:
+            player->AddItem(ITEM_CONTAINER + 14, 1);
+            s.LearnAllSpells(player);
+            break;
+        }
+    }
+};
+
 class NpcStarter : public CreatureScript
 {
 public:
     NpcStarter() : CreatureScript("NpcStarter") {}
 
-    LearnSpells s;
     DestroyGear d;
+    AddGear g;
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
         ClearGossipMenuFor(player);
+
+        std::cout << "On gossip hello" << '\n';
 
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -283,6 +344,7 @@ public:
 
         if (sConfigMgr->GetOption<bool>("HardcoreGossip.Enable", true))
         {
+            std::cout << "Config is true" << '\n';
             if (isLevelOne && !hasMoney && !isHardcore)
                 AddGossipItemFor(player, GOSSIP_HELLO_HARDCORE, 1, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_HARDCORE);
                 
@@ -362,47 +424,8 @@ public:
         else if (action == GOSSIP_OPTION_BOOST + 1)
         {
             d.DestroyAll(player);
+            g.AddEquipment(player);
             player->GiveLevel(15);
-
-            switch (player->getClass())
-            {
-            case CLASS_WARRIOR:
-                player->AddItem(ITEM_CONTAINER, 1);
-                s.LearnAllSpells(player);
-                break;
-            case CLASS_PALADIN:
-                player->AddItem(ITEM_CONTAINER + 1, 1);
-                s.LearnAllSpells(player);
-                break;
-            case CLASS_HUNTER:
-                player->AddItem(ITEM_CONTAINER + 2, 1);
-                s.LearnAllSpells(player);
-                break;
-            case CLASS_ROGUE:
-                player->AddItem(ITEM_CONTAINER + 3, 1);
-                s.LearnAllSpells(player);
-                break;
-            case CLASS_PRIEST:
-                player->AddItem(ITEM_CONTAINER + 4, 1);
-                s.LearnAllSpells(player);
-                break;
-            case CLASS_SHAMAN:
-                player->AddItem(ITEM_CONTAINER + 5, 1);
-                s.LearnAllSpells(player);
-                break;
-            case CLASS_MAGE:
-                player->AddItem(ITEM_CONTAINER + 6, 1);
-                s.LearnAllSpells(player);
-                break;
-            case CLASS_WARLOCK:
-                player->AddItem(ITEM_CONTAINER + 7, 1);
-                s.LearnAllSpells(player);
-                break;
-            case CLASS_DRUID:
-                player->AddItem(ITEM_CONTAINER + 8, 1);
-                s.LearnAllSpells(player);
-                break;
-            }
 
             CloseGossipMenuFor(player);
         }
