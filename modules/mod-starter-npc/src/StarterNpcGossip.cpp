@@ -439,7 +439,7 @@ public:
 
         if (sConfigMgr->GetOption<bool>("PlayerBoost.Enable", true))
         {
-            if (isLevelOne)
+            if (isLevelOne && !isHardcore)
                 AddGossipItemFor(player, GOSSIP_HELLO_BOOST, 1, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_BOOST);  
         }
 
