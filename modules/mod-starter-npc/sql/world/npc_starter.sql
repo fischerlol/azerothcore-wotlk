@@ -39,4 +39,4 @@ DELETE FROM `npc_text` WHERE `ID` = @base_text;
 INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES (@base_text, 'Note: Wobblin’ Goblin is in no way responsible for your Hardcore character. If you choose to create and play a Hardcore character, you do so at your own risk. Wobbling Goblin is not responsible for the death and loss of your hardcore characters for any reason including Internet lag, bugs, Acts of God, your little sister, or any other reason whatsoever. Consult the End User License Agreement for more details. Wobbling Goblin will not, and does not have the capability to restore any deceased Hardcore characters. Don\'t even ask. La-la-la-la-la, we can\'t hear you...');
 
 DELETE FROM `npc_text` WHERE `ID` = @base_text+1;
-INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES (@base_text+1, 'Info text that boost person will see.');
+INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES (@base_text+1, 'WIP: info text that boost person will see.');
