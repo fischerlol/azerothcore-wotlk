@@ -315,11 +315,11 @@ INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `requi
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 3, 3044, 6, -1, 'Arcane Shot (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 3, 5116, 8, -1, 'Concussive Shot');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 3, 14260, 8, 2973, 'Raptor Strike (Rank 2)');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 3, 883, 10, -1, 1, 'Call Pet');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 3, 982, 10, 883, 1, 'Revive Pet');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 3, 1515, 10, 883, 1, 'Tame Beast');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 3, 2641, 10, 883, 1, 'Dismiss Pet');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 3, 6991, 10, 883, 1, 'Feed Pet');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 3, 883, 10, -1, -1, 'Call Pet');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 3, 982, 10, -1, -1, 'Revive Pet');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 3, 1515, 10, -1, -1, 'Tame Beast');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 3, 2641, 10, -1, -1, 'Dismiss Pet');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 3, 6991, 10, -1, -1, 'Feed Pet');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 3, 13165, 10, -1, 'Aspect of the Hawk (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 3, 13549, 10, 1978, 'Serpent Sting (Rank 2)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 3, 19883, 10, -1, 'Track Humanoids');
