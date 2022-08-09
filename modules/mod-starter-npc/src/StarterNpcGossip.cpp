@@ -1,6 +1,8 @@
 #include "Chat.h"
 #include "Config.h"
 #include "Player.h"
+#include "Pet.h"
+#include "Unit.h"
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
 #include "DataMap.h"
@@ -27,6 +29,12 @@
 #define ITEM_ARMOR              91000
 #define ITEM_WEAPON             92000
 
+#define ITEM_ARROWS             2515
+#define ITEM_BULLETS            2519
+
+#define ITEM_STARTER_ARROWS     2512
+#define ITEM_STARTER_BULLETS    2516
+
 struct ClassSpells
 {
     int RaceId;
@@ -44,9 +52,6 @@ struct Proficiencies
     int RequiredLevel;
 };
 
-std::vector<ClassSpells> lsClassSpells;
-std::vector<Proficiencies> lsProficiencies;
-
 enum SpellType
 {
     CLASS = 0,
@@ -55,6 +60,9 @@ enum SpellType
 
 enum EquipmentSlotsStarter
 {
+    STARTER_EQUIPMENT_SLOT_BODY = 3,
+    STARTER_EQUIPMENT_SLOT_CHEST = 4,
+    STARTER_EQUIPMENT_SLOT_WAIST = 5,
     STARTER_EQUIPMENT_SLOT_LEGS = 6,
     STARTER_EQUIPMENT_SLOT_FEET = 7,
     STARTER_EQUIPMENT_SLOT_MAINHAND = 15,
@@ -62,12 +70,59 @@ enum EquipmentSlotsStarter
     STARTER_EQUIPMENT_SLOT_RANGED = 17,
 };
 
+std::vector<ClassSpells> lsClassSpells;
+std::vector<Proficiencies> lsProficiencies;
+
+
+class HunterPet
+{
+public:
+    void CreatePet(Player* player, Creature* creature, uint32 entry)
+    {
+        if (player->getClass() != CLASS_HUNTER)
+            return;
+
+        if (player->GetPet())
+            return;
+
+        Creature* creatureTarget = creature->SummonCreature(entry, player->GetPositionX(), player->GetPositionY() + 2, player->GetPositionZ(), player->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 500);
+        if (!creatureTarget)
+            return;
+
+        Pet* pet = player->CreateTamedPetFrom(creatureTarget, 0);
+        if (!pet)
+            return;
+
+        // kill original creature
+        creatureTarget->setDeathState(JUST_DIED);
+        creatureTarget->RemoveCorpse();
+        creatureTarget->SetHealth(0);
+
+        pet->SetPower(POWER_HAPPINESS, 1048000);
+
+        // prepare visual effect for levelup
+        pet->SetUInt32Value(UNIT_FIELD_LEVEL, player->getLevel() - 1);
+        pet->GetMap()->AddToMap(pet->ToCreature());
+
+        // visual effect for levelup
+        pet->SetUInt32Value(UNIT_FIELD_LEVEL, player->getLevel());
+
+        if (!pet->InitStatsForLevel(player->getLevel()))
+            sLog->outMessage("server", LogLevel::LOG_LEVEL_ERROR, "Pet Create fail: No init stats for pet with entry %u", entry);
+
+        pet->UpdateAllStats();
+        player->SetMinion(pet, true);
+        pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+        player->PetSpellInitialize();
+    }
+};
+
 class DestroyGear
 {
 public:
     void DestroyArmor(Player* player)
     {
-        for (uint8 i = STARTER_EQUIPMENT_SLOT_LEGS; i < STARTER_EQUIPMENT_SLOT_FEET+1; ++i)
+        for (uint8 i = STARTER_EQUIPMENT_SLOT_BODY; i < STARTER_EQUIPMENT_SLOT_FEET+1; ++i)
         {
             if (Item* haveItemEquipped = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             {
@@ -113,25 +168,32 @@ public:
         }
     }
 
+    void DestroyProjectiles(Player* player)
+    {
+        if (player->HasItemCount(ITEM_STARTER_BULLETS, 200, false))
+            player->DestroyItemCount(ITEM_STARTER_BULLETS, 200, true, true);
+
+        if (player->HasItemCount(ITEM_STARTER_ARROWS, 200, false))
+            player->DestroyItemCount(ITEM_STARTER_ARROWS, 200, true, true);
+
+        if (player->HasItemCount(ITEM_ARROWS, 1200, false))
+                player->SetAmmo(ITEM_ARROWS);
+
+        if (player->HasItemCount(ITEM_BULLETS, 1200, false))
+                player->SetAmmo(ITEM_BULLETS);
+    }
+
     void DestroyAll(Player* player)
     {
         DestroyWeapons(player);
         DestroyArmor(player);
+        DestroyProjectiles(player);
     }
 };
 
 class LearnSpells
 {
 public:
-    void LearnAllSpells(Player* player)
-    {
-        LearnSpellsForNewLevel(player);
-        LearnProficienciesForNewLevel(player);
-
-        if (player->getClass() == CLASS_SHAMAN)
-            AddShamanTotems(player);
-    }
-
     void LearnSpellsForNewLevel(Player* player)
     {
         for (auto& classSpell : lsClassSpells)
@@ -174,6 +236,16 @@ public:
                 if (!player->HasItemTotemCategory(totems[i][1]))
                     player->AddItem(totems[i][0], 1);
         }
+    }
+
+    void LearnAllSpells(Player* player)
+    {
+        LearnSpellsForNewLevel(player);
+        LearnProficienciesForNewLevel(player);
+        player->UpdateSkillsToMaxSkillsForLevel();
+
+        if (player->getClass() == CLASS_SHAMAN)
+            AddShamanTotems(player);
     }
 };
 
@@ -264,55 +336,71 @@ class AddGear
 public:
     void AddEquipment(Player* player)
     {
-        LearnSpells s;
-
         switch (player->getClass())
         {
         case CLASS_WARRIOR:
             if (player->getRace() == RACE_ORC)
+            {
                 player->AddItem(ITEM_CONTAINER + 1, 1);
-            if (player->getRace() == RACE_TAUREN || RACE_DWARF)
+                player->AddItem(ITEM_ARROWS, 200);
+            }
+            else if (player->getRace() == RACE_TAUREN || player->getRace() == RACE_DWARF)
+            {
                 player->AddItem(ITEM_CONTAINER + 2, 1);
-            player->AddItem(ITEM_CONTAINER, 1);
-            s.LearnAllSpells(player);
+                player->AddItem(ITEM_BULLETS, 200);
+            }
+            else
+            {
+                player->AddItem(ITEM_CONTAINER, 1);
+                player->AddItem(ITEM_ARROWS, 200);
+            }
             break;
         case CLASS_PALADIN:
-            player->AddItem(ITEM_CONTAINER + 4, 1);
-            s.LearnAllSpells(player);
+            player->AddItem(ITEM_CONTAINER + 3, 1);
             break;
         case CLASS_HUNTER:
-            if (player->getRace() == RACE_TAUREN || RACE_DWARF)
-                player->AddItem(ITEM_CONTAINER + 6, 1);
-            player->AddItem(ITEM_CONTAINER + 5, 1);
-            s.LearnAllSpells(player);
+            if (player->getRace() == RACE_TAUREN || player->getRace() == RACE_DWARF)
+            {
+                player->AddItem(ITEM_CONTAINER + 5, 1);
+                player->AddItem(ITEM_BULLETS, 1200);
+            }
+            else
+            {
+                player->AddItem(ITEM_CONTAINER + 4, 1);
+                player->AddItem(ITEM_ARROWS, 1200);
+            }
             break;
         case CLASS_ROGUE:
             if (player->getRace() == RACE_ORC)
+            {
+                player->AddItem(ITEM_CONTAINER + 7, 1);
+                player->AddItem(ITEM_ARROWS, 200);
+            }
+            else if (player->getRace() == RACE_DWARF)
+            {
                 player->AddItem(ITEM_CONTAINER + 8, 1);
-            if (player->getRace() == RACE_DWARF)
-                player->AddItem(ITEM_CONTAINER + 9, 1);
-            player->AddItem(ITEM_CONTAINER + 7, 1);
-            s.LearnAllSpells(player);
+                player->AddItem(ITEM_BULLETS, 200);
+            }
+            else
+            {
+                player->AddItem(ITEM_CONTAINER + 6, 1);
+                player->AddItem(ITEM_ARROWS, 200);
+            }
             break;
         case CLASS_PRIEST:
-            player->AddItem(ITEM_CONTAINER + 10, 1);
-            s.LearnAllSpells(player);
+            player->AddItem(ITEM_CONTAINER + 9, 1);
             break;
         case CLASS_SHAMAN:
-            player->AddItem(ITEM_CONTAINER + 11, 1);
-            s.LearnAllSpells(player);
+            player->AddItem(ITEM_CONTAINER + 10, 1);
             break;
         case CLASS_MAGE:
-            player->AddItem(ITEM_CONTAINER + 12, 1);
-            s.LearnAllSpells(player);
+            player->AddItem(ITEM_CONTAINER + 11, 1);
             break;
         case CLASS_WARLOCK:
-            player->AddItem(ITEM_CONTAINER + 13, 1);
-            s.LearnAllSpells(player);
+            player->AddItem(ITEM_CONTAINER + 12, 1);
             break;
         case CLASS_DRUID:
-            player->AddItem(ITEM_CONTAINER + 14, 1);
-            s.LearnAllSpells(player);
+            player->AddItem(ITEM_CONTAINER + 13, 1);
             break;
         }
     }
@@ -323,14 +411,14 @@ class NpcStarter : public CreatureScript
 public:
     NpcStarter() : CreatureScript("NpcStarter") {}
 
+    LearnSpells s;
     DestroyGear d;
     AddGear g;
-
+    HunterPet p;
+    
     bool OnGossipHello(Player* player, Creature* creature)
     {
         ClearGossipMenuFor(player);
-
-        std::cout << "On gossip hello" << '\n';
 
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
@@ -344,7 +432,6 @@ public:
 
         if (sConfigMgr->GetOption<bool>("HardcoreGossip.Enable", true))
         {
-            std::cout << "Config is true" << '\n';
             if (isLevelOne && !hasMoney && !isHardcore)
                 AddGossipItemFor(player, GOSSIP_HELLO_HARDCORE, 1, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_HARDCORE);
                 
@@ -423,9 +510,35 @@ public:
         }
         else if (action == GOSSIP_OPTION_BOOST + 1)
         {
-            d.DestroyAll(player);
-            g.AddEquipment(player);
             player->GiveLevel(15);
+            s.LearnAllSpells(player);
+            g.AddEquipment(player);
+            d.DestroyAll(player);
+
+            switch (player->getRace())
+            {
+            case RACE_NIGHTELF:
+                p.CreatePet(player, creature, 2031);
+                break;
+            case RACE_DWARF:
+                p.CreatePet(player, creature, 705);
+                break;
+            case RACE_DRAENEI:
+                p.CreatePet(player, creature, 16520);
+                break;
+            case RACE_ORC:
+                p.CreatePet(player, creature, 3098);
+                break;
+            case RACE_TROLL:
+                p.CreatePet(player, creature, 3098);
+                break;
+            case RACE_TAUREN:
+                p.CreatePet(player, creature, 2955);
+                break;
+            case RACE_BLOODELF:
+                p.CreatePet(player, creature, 15366);
+                break;
+            }
 
             CloseGossipMenuFor(player);
         }
