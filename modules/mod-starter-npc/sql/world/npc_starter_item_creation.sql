@@ -133,6 +133,10 @@ set @comment = "";
 set @container_description = "Includes everything that a new recruit needs to get started";
 set @container_name = "Initiate's Supplies";
 
+-- projectiles
+set @bullets = 2519;
+set @arrows = 2515;
+
 -- other
 set @quality = 2;
 set @sell_price = 0;
@@ -430,7 +434,7 @@ call create_boots(@base_item_armor+62, "Initiate's Wildheart Boots", '', @subcla
 * Class Containers
 */
 
--- Warrior
+-- Warrior Container 1 (Sword/Bow)
 CALL create_item_container(@base_item_container, @base_item_container);
 CALL create_container_loot(@base_item_container, @base_item_armor);
 CALL create_container_loot(@base_item_container, @base_item_armor+1);
@@ -439,83 +443,182 @@ CALL create_container_loot(@base_item_container, @base_item_armor+3);
 CALL create_container_loot(@base_item_container, @base_item_armor+4);
 CALL create_container_loot(@base_item_container, @base_item_armor+5);
 CALL create_container_loot(@base_item_container, @base_item_armor+6);
+CALL create_container_loot(@base_item_container, @base_item_weapon+1);
+CALL create_container_loot(@base_item_container, @base_item_weapon+2);
+CALL create_container_loot(@base_item_container, @base_item_weapon+4);
+CALL create_container_loot(@base_item_container, @base_item_weapon+10);
+CALL create_container_loot(@base_item_container, @arrows);
 
--- Paladin
+-- Warrior Container 2 (Axe/Bow)
 CALL create_item_container(@base_item_container+1, @base_item_container+1);
-CALL create_container_loot(@base_item_container+1, @base_item_armor+7);
-CALL create_container_loot(@base_item_container+1, @base_item_armor+8);
-CALL create_container_loot(@base_item_container+1, @base_item_armor+9);
-CALL create_container_loot(@base_item_container+1, @base_item_armor+10);
-CALL create_container_loot(@base_item_container+1, @base_item_armor+11);
-CALL create_container_loot(@base_item_container+1, @base_item_armor+12);
-CALL create_container_loot(@base_item_container+1, @base_item_armor+13);
+CALL create_container_loot(@base_item_container+1, @base_item_armor);
+CALL create_container_loot(@base_item_container+1, @base_item_armor+1);
+CALL create_container_loot(@base_item_container+1, @base_item_armor+2);
+CALL create_container_loot(@base_item_container+1, @base_item_armor+3);
+CALL create_container_loot(@base_item_container+1, @base_item_armor+4);
+CALL create_container_loot(@base_item_container+1, @base_item_armor+5);
+CALL create_container_loot(@base_item_container+1, @base_item_armor+6);
+CALL create_container_loot(@base_item_container+1, @base_item_weapon);
+CALL create_container_loot(@base_item_container+1, @base_item_weapon+2);
+CALL create_container_loot(@base_item_container+1, @base_item_weapon+6);
+CALL create_container_loot(@base_item_container+1, @base_item_weapon+10);
+CALL create_container_loot(@base_item_container+1, @arrows);
 
--- Hunter
-CALL create_item_container(@base_item_container+2, @base_item_container+2);
-CALL create_container_loot(@base_item_container+2, @base_item_armor+14);
-CALL create_container_loot(@base_item_container+2, @base_item_armor+15);
-CALL create_container_loot(@base_item_container+2, @base_item_armor+16);
-CALL create_container_loot(@base_item_container+2, @base_item_armor+17);
-CALL create_container_loot(@base_item_container+2, @base_item_armor+18);
-CALL create_container_loot(@base_item_container+2, @base_item_armor+19);
-CALL create_container_loot(@base_item_container+2, @base_item_armor+20);
+-- Warrior Container 3 (Axe/Gun)
+CALL create_item_container(@base_item_container+2, @base_item_container+3);
+CALL create_container_loot(@base_item_container+2, @base_item_armor);
+CALL create_container_loot(@base_item_container+2, @base_item_armor+1);
+CALL create_container_loot(@base_item_container+2, @base_item_armor+2);
+CALL create_container_loot(@base_item_container+2, @base_item_armor+3);
+CALL create_container_loot(@base_item_container+2, @base_item_armor+4);
+CALL create_container_loot(@base_item_container+3, @base_item_armor+5);
+CALL create_container_loot(@base_item_container+3, @base_item_armor+6);
+CALL create_container_loot(@base_item_container+3, @base_item_weapon);
+CALL create_container_loot(@base_item_container+3, @base_item_weapon+6);
+CALL create_container_loot(@base_item_container+3, @base_item_weapon+10);
+CALL create_container_loot(@base_item_container+3, @base_item_weapon+11);
+CALL create_container_loot(@base_item_container+3, @bullets);
+ 
+-- Paladin
+CALL create_item_container(@base_item_container+4, @base_item_container+4);
+CALL create_container_loot(@base_item_container+4, @base_item_armor+7);
+CALL create_container_loot(@base_item_container+4, @base_item_armor+8);
+CALL create_container_loot(@base_item_container+4, @base_item_armor+9);
+CALL create_container_loot(@base_item_container+4, @base_item_armor+10);
+CALL create_container_loot(@base_item_container+4, @base_item_armor+11);
+CALL create_container_loot(@base_item_container+4, @base_item_armor+12);
+CALL create_container_loot(@base_item_container+4, @base_item_armor+13);
+CALL create_container_loot(@base_item_container+4, @base_item_weapon+1);
+CALL create_container_loot(@base_item_container+4, @base_item_weapon+4);
+CALL create_container_loot(@base_item_container+4, @base_item_weapon+10);
 
--- Rogue
-CALL create_item_container(@base_item_container+3, @base_item_container+3);
-CALL create_container_loot(@base_item_container+3, @base_item_armor+21);
-CALL create_container_loot(@base_item_container+3, @base_item_armor+22);
-CALL create_container_loot(@base_item_container+3, @base_item_armor+23);
-CALL create_container_loot(@base_item_container+3, @base_item_armor+24);
-CALL create_container_loot(@base_item_container+3, @base_item_armor+25);
-CALL create_container_loot(@base_item_container+3, @base_item_armor+26);
-CALL create_container_loot(@base_item_container+3, @base_item_armor+27);
+-- Hunter Container 1 (Axe/Bow)
+CALL create_item_container(@base_item_container+5, @base_item_container+5);
+CALL create_container_loot(@base_item_container+5, @base_item_armor+14);
+CALL create_container_loot(@base_item_container+5, @base_item_armor+15);
+CALL create_container_loot(@base_item_container+5, @base_item_armor+16);
+CALL create_container_loot(@base_item_container+5, @base_item_armor+17);
+CALL create_container_loot(@base_item_container+5, @base_item_armor+18);
+CALL create_container_loot(@base_item_container+5, @base_item_armor+19);
+CALL create_container_loot(@base_item_container+5, @base_item_armor+20);
+CALL create_container_loot(@base_item_container+5, @base_item_weapon);
+CALL create_container_loot(@base_item_container+5, @base_item_weapon+2);
+CALL create_container_loot(@base_item_container+5, @arrows);
+
+-- Hunter Container 1 (Axe/Gun)
+CALL create_item_container(@base_item_container+6, @base_item_container+6);
+CALL create_container_loot(@base_item_container+6, @base_item_armor+14);
+CALL create_container_loot(@base_item_container+6, @base_item_armor+15);
+CALL create_container_loot(@base_item_container+6, @base_item_armor+16);
+CALL create_container_loot(@base_item_container+6, @base_item_armor+17);
+CALL create_container_loot(@base_item_container+6, @base_item_armor+18);
+CALL create_container_loot(@base_item_container+6, @base_item_armor+19);
+CALL create_container_loot(@base_item_container+6, @base_item_armor+20);
+CALL create_container_loot(@base_item_container+6, @base_item_weapon);
+CALL create_container_loot(@base_item_container+6, @base_item_weapon+10);
+CALL create_container_loot(@base_item_container+6, @bullets);
+
+-- Rogue Container 1 (Sword/Bow)
+CALL create_item_container(@base_item_container+7, @base_item_container+7);
+CALL create_container_loot(@base_item_container+7, @base_item_armor+21);
+CALL create_container_loot(@base_item_container+7, @base_item_armor+22);
+CALL create_container_loot(@base_item_container+7, @base_item_armor+23);
+CALL create_container_loot(@base_item_container+7, @base_item_armor+24);
+CALL create_container_loot(@base_item_container+7, @base_item_armor+25);
+CALL create_container_loot(@base_item_container+7, @base_item_armor+26);
+CALL create_container_loot(@base_item_container+7, @base_item_armor+27);
+CALL create_container_loot(@base_item_container+7, @base_item_weapon+2);
+CALL create_container_loot(@base_item_container+7, @base_item_weapon+4);
+CALL create_container_loot(@base_item_container+7, @base_item_weapon+4);
+CALL create_container_loot(@base_item_container+7, @arrows);
+
+-- Rogue Container 2 (Axe/Bow)
+CALL create_item_container(@base_item_container+8, @base_item_container+8);
+CALL create_container_loot(@base_item_container+8, @base_item_armor+21);
+CALL create_container_loot(@base_item_container+8, @base_item_armor+22);
+CALL create_container_loot(@base_item_container+8, @base_item_armor+23);
+CALL create_container_loot(@base_item_container+8, @base_item_armor+24);
+CALL create_container_loot(@base_item_container+8, @base_item_armor+25);
+CALL create_container_loot(@base_item_container+8, @base_item_armor+26);
+CALL create_container_loot(@base_item_container+8, @base_item_armor+27);
+CALL create_container_loot(@base_item_container+8, @base_item_weapon+2);
+CALL create_container_loot(@base_item_container+8, @base_item_weapon+6);
+CALL create_container_loot(@base_item_container+8, @base_item_weapon+6);
+CALL create_container_loot(@base_item_container+8, @arrows);
+
+-- Rogue Container 3 (Sword/Gun)
+CALL create_item_container(@base_item_container+9, @base_item_container+9);
+CALL create_container_loot(@base_item_container+9, @base_item_armor+21);
+CALL create_container_loot(@base_item_container+9, @base_item_armor+22);
+CALL create_container_loot(@base_item_container+9, @base_item_armor+23);
+CALL create_container_loot(@base_item_container+9, @base_item_armor+24);
+CALL create_container_loot(@base_item_container+9, @base_item_armor+25);
+CALL create_container_loot(@base_item_container+9, @base_item_armor+26);
+CALL create_container_loot(@base_item_container+9, @base_item_armor+27);
+CALL create_container_loot(@base_item_container+9, @base_item_weapon+10);
+CALL create_container_loot(@base_item_container+9, @base_item_weapon+4);
+CALL create_container_loot(@base_item_container+9, @base_item_weapon+4);
+CALL create_container_loot(@base_item_container+9, @bullets);
 
 -- Priest
-CALL create_item_container(@base_item_container+4, @base_item_container+4);
-CALL create_container_loot(@base_item_container+4, @base_item_armor+28);
-CALL create_container_loot(@base_item_container+4, @base_item_armor+29);
-CALL create_container_loot(@base_item_container+4, @base_item_armor+30);
-CALL create_container_loot(@base_item_container+4, @base_item_armor+31);
-CALL create_container_loot(@base_item_container+4, @base_item_armor+32);
-CALL create_container_loot(@base_item_container+4, @base_item_armor+33);
-CALL create_container_loot(@base_item_container+4, @base_item_armor+34);
+CALL create_item_container(@base_item_container+10, @base_item_container+10);
+CALL create_container_loot(@base_item_container+10, @base_item_armor+28);
+CALL create_container_loot(@base_item_container+10, @base_item_armor+29);
+CALL create_container_loot(@base_item_container+10, @base_item_armor+30);
+CALL create_container_loot(@base_item_container+10, @base_item_armor+31);
+CALL create_container_loot(@base_item_container+10, @base_item_armor+32);
+CALL create_container_loot(@base_item_container+10, @base_item_armor+33);
+CALL create_container_loot(@base_item_container+10, @base_item_armor+34);
+CALL create_container_loot(@base_item_container+10, @base_item_weapon+5);
+CALL create_container_loot(@base_item_container+10, @base_item_weapon+7);
 
 -- Shaman
-CALL create_item_container(@base_item_container+5, @base_item_container+5);
-CALL create_container_loot(@base_item_container+5, @base_item_armor+35);
-CALL create_container_loot(@base_item_container+5, @base_item_armor+36);
-CALL create_container_loot(@base_item_container+5, @base_item_armor+37);
-CALL create_container_loot(@base_item_container+5, @base_item_armor+38);
-CALL create_container_loot(@base_item_container+5, @base_item_armor+39);
-CALL create_container_loot(@base_item_container+5, @base_item_armor+40);
-CALL create_container_loot(@base_item_container+5, @base_item_armor+41);
+CALL create_item_container(@base_item_container+11, @base_item_container+11);
+CALL create_container_loot(@base_item_container+11, @base_item_armor+35);
+CALL create_container_loot(@base_item_container+11, @base_item_armor+36);
+CALL create_container_loot(@base_item_container+11, @base_item_armor+37);
+CALL create_container_loot(@base_item_container+11, @base_item_armor+38);
+CALL create_container_loot(@base_item_container+11, @base_item_armor+39);
+CALL create_container_loot(@base_item_container+11, @base_item_armor+40);
+CALL create_container_loot(@base_item_container+11, @base_item_armor+41);
+CALL create_container_loot(@base_item_container+11, @base_item_weapon);
+CALL create_container_loot(@base_item_container+11, @base_item_weapon+3);
+CALL create_container_loot(@base_item_container+11, @base_item_weapon+6);
+CALL create_container_loot(@base_item_container+11, @base_item_weapon+7);
+CALL create_container_loot(@base_item_container+11, @base_item_weapon+9);
 
 -- Mage
-CALL create_item_container(@base_item_container+6, @base_item_container+6);
-CALL create_container_loot(@base_item_container+6, @base_item_armor+42);
-CALL create_container_loot(@base_item_container+6, @base_item_armor+43);
-CALL create_container_loot(@base_item_container+6, @base_item_armor+44);
-CALL create_container_loot(@base_item_container+6, @base_item_armor+45);
-CALL create_container_loot(@base_item_container+6, @base_item_armor+46);
-CALL create_container_loot(@base_item_container+6, @base_item_armor+47);
-CALL create_container_loot(@base_item_container+6, @base_item_armor+48);
+CALL create_item_container(@base_item_container+12, @base_item_container+12);
+CALL create_container_loot(@base_item_container+12, @base_item_armor+42);
+CALL create_container_loot(@base_item_container+12, @base_item_armor+43);
+CALL create_container_loot(@base_item_container+12, @base_item_armor+44);
+CALL create_container_loot(@base_item_container+12, @base_item_armor+45);
+CALL create_container_loot(@base_item_container+12, @base_item_armor+46);
+CALL create_container_loot(@base_item_container+12, @base_item_armor+47);
+CALL create_container_loot(@base_item_container+12, @base_item_armor+48);
+CALL create_container_loot(@base_item_container+12, @base_item_weapon+5);
+CALL create_container_loot(@base_item_container+12, @base_item_weapon+7);
 
 -- Warlock
-CALL create_item_container(@base_item_container+7, @base_item_container+7);
-CALL create_container_loot(@base_item_container+7, @base_item_armor+49);
-CALL create_container_loot(@base_item_container+7, @base_item_armor+50);
-CALL create_container_loot(@base_item_container+7, @base_item_armor+51);
-CALL create_container_loot(@base_item_container+7, @base_item_armor+52);
-CALL create_container_loot(@base_item_container+7, @base_item_armor+53);
-CALL create_container_loot(@base_item_container+7, @base_item_armor+54);
-CALL create_container_loot(@base_item_container+7, @base_item_armor+55);
+CALL create_item_container(@base_item_container+13, @base_item_container+13);
+CALL create_container_loot(@base_item_container+13, @base_item_armor+49);
+CALL create_container_loot(@base_item_container+13, @base_item_armor+50);
+CALL create_container_loot(@base_item_container+13, @base_item_armor+51);
+CALL create_container_loot(@base_item_container+13, @base_item_armor+52);
+CALL create_container_loot(@base_item_container+13, @base_item_armor+53);
+CALL create_container_loot(@base_item_container+13, @base_item_armor+54);
+CALL create_container_loot(@base_item_container+13, @base_item_armor+55);
+CALL create_container_loot(@base_item_container+13, @base_item_weapon+5);
+CALL create_container_loot(@base_item_container+13, @base_item_weapon+7);
 
 -- Druid
-CALL create_item_container(@base_item_container+8, @base_item_container+8);
-CALL create_container_loot(@base_item_container+8, @base_item_armor+56);
-CALL create_container_loot(@base_item_container+8, @base_item_armor+57);
-CALL create_container_loot(@base_item_container+8, @base_item_armor+58);
-CALL create_container_loot(@base_item_container+8, @base_item_armor+59);
-CALL create_container_loot(@base_item_container+8, @base_item_armor+60);
-CALL create_container_loot(@base_item_container+8, @base_item_armor+61);
-CALL create_container_loot(@base_item_container+8, @base_item_armor+62);
+CALL create_item_container(@base_item_container+14, @base_item_container+14);
+CALL create_container_loot(@base_item_container+14, @base_item_armor+56);
+CALL create_container_loot(@base_item_container+14, @base_item_armor+57);
+CALL create_container_loot(@base_item_container+14, @base_item_armor+58);
+CALL create_container_loot(@base_item_container+14, @base_item_armor+59);
+CALL create_container_loot(@base_item_container+14, @base_item_armor+60);
+CALL create_container_loot(@base_item_container+14, @base_item_armor+61);
+CALL create_container_loot(@base_item_container+14, @base_item_armor+62);
+CALL create_container_loot(@base_item_container+14, @base_item_weapon+7);
+CALL create_container_loot(@base_item_container+14, @base_item_weapon+8);
