@@ -3,14 +3,14 @@ set @base_gossip_select = 63000;
 set @base_text = 70000;
 
 -- add creature script to each starting creature
-UPDATE `creature_template` SET `ScriptName` = 'npc_starter' WHERE `entry` = 823;   -- Deputy Willem (Human)
-UPDATE `creature_template` SET `ScriptName` = 'npc_starter' WHERE `entry` = 2079;  -- Conservator Ilthalaine (Night Elf)
-UPDATE `creature_template` SET `ScriptName` = 'npc_starter' WHERE `entry` = 16475; -- Megelon (Draenei)
-UPDATE `creature_template` SET `ScriptName` = 'npc_starter' WHERE `entry` = 658;   -- Sten Stoutarm (Dwarf/Gnome)
-UPDATE `creature_template` SET `ScriptName` = 'npc_starter' WHERE `entry` = 15278; -- Magistrix Erona (Blood Elf)
-UPDATE `creature_template` SET `ScriptName` = 'npc_starter' WHERE `entry` = 1568;  -- Undertaker Mordo (Undead)
-UPDATE `creature_template` SET `ScriptName` = 'npc_starter' WHERE `entry` = 10176; -- Kaltunk (Orc/Troll)
-UPDATE `creature_template` SET `ScriptName` = 'npc_starter' WHERE `entry` = 2980;  -- Grull Hawkwind (Tauren)
+UPDATE `creature_template` SET `ScriptName` = 'NpcStarter' WHERE `entry` = 823;   -- Deputy Willem (Human)
+UPDATE `creature_template` SET `ScriptName` = 'NpcStarter' WHERE `entry` = 2079;  -- Conservator Ilthalaine (Night Elf)
+UPDATE `creature_template` SET `ScriptName` = 'NpcStarter' WHERE `entry` = 16475; -- Megelon (Draenei)
+UPDATE `creature_template` SET `ScriptName` = 'NpcStarter' WHERE `entry` = 658;   -- Sten Stoutarm (Dwarf/Gnome)
+UPDATE `creature_template` SET `ScriptName` = 'NpcStarter' WHERE `entry` = 15278; -- Magistrix Erona (Blood Elf)
+UPDATE `creature_template` SET `ScriptName` = 'NpcStarter' WHERE `entry` = 1568;  -- Undertaker Mordo (Undead)
+UPDATE `creature_template` SET `ScriptName` = 'NpcStarter' WHERE `entry` = 10176; -- Kaltunk (Orc/Troll)
+UPDATE `creature_template` SET `ScriptName` = 'NpcStarter' WHERE `entry` = 2980;  -- Grull Hawkwind (Tauren)
 
 -- add the gossip hello menu options to the database
 DELETE FROM `gossip_menu_option` WHERE `MenuID` = @base_gossip_hello;
