@@ -26,11 +26,11 @@ INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `requi
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 1, 34428, 6, -1, 'Victory Rush');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 1, 284, 8, 78, 'Heroic Strike (Rank 2)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 1, 1715, 8, -1, 'Hamstring');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 1, 71, 10, -1, 1, 'Defensive Stance');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 1, 355, 10, 71, 1, 'Taunt');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 1, 71, 10, -1, -1, 'Defensive Stance');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 1, 355, 10, 71, -1, 'Taunt');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 1, 2687, 10, -1, 'Bloodrage');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 1, 6546, 10, 772, 'Rend (Rank 2)');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 1, 7386, 10, 71, 1, 'Sunder Armor');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 1, 7386, 10, 71, -1, 'Sunder Armor');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 1, 72, 12, -1, 'Shield Bash');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 1, 5242, 12, 6673, 'Battle Shout (Rank 2)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 1, 7384, 12, -1, 'Overpower');
@@ -1352,7 +1352,7 @@ INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `requi
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 9, 980, 8, -1, 'Curse of Agony (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 9, 5782, 8, -1, 'Fear (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 9, 696, 10, 687, 'Demon Skin (Rank 2)');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 9, 697, 10, -1, 1, 'Summon Voidwalker');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 9, 697, 10, -1, -1, 'Summon Voidwalker');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 9, 707, 10, 348, 'Immolate (Rank 2)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 9, 1120, 10, -1, 'Drain Soul (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 9, 6201, 10, -1, 'Create Healthstone (Rank 1)');
@@ -1565,9 +1565,9 @@ INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `requi
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 11, 99, 10, -1, 'Demoralizing Roar (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 11, 1058, 10, 774, 'Rejuvenation (Rank 2)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 11, 5232, 10, 1126, 'Mark of the Wild (Rank 2)');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 11, 5487, 10, -1, 1, 'Bear Form (Shapeshift)');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 11, 6795, 10, 5487, 1, 'Growl');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 11, 6807, 10, 5487, 1, 'Maul (Rank 1)');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 11, 5487, 10, -1, -1, 'Bear Form (Shapeshift)');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 11, 6795, 10, 5487, -1, 'Growl');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 11, 6807, 10, 5487, -1, 'Maul (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 11, 8924, 10, 8921, 'Moonfire (Rank 2)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 11, 16689, 10, -1, 'Nature\'s Grasp (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 11, 5229, 12, -1, 'Enrage');
