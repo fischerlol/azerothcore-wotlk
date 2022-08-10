@@ -177,10 +177,16 @@ public:
             player->DestroyItemCount(ITEM_STARTER_ARROWS, 200, true, true);
 
         if (player->HasItemCount(ITEM_ARROWS, 1200, false))
-                player->SetAmmo(ITEM_ARROWS);
+            player->SetAmmo(ITEM_ARROWS);
 
         if (player->HasItemCount(ITEM_BULLETS, 1200, false))
-                player->SetAmmo(ITEM_BULLETS);
+            player->SetAmmo(ITEM_BULLETS);
+
+        if (player->HasItemCount(ITEM_ARROWS, 200, false))
+            player->SetAmmo(ITEM_ARROWS);
+
+        if (player->HasItemCount(ITEM_BULLETS, 200, false))
+            player->SetAmmo(ITEM_BULLETS);
     }
 
     void DestroyAll(Player* player)
