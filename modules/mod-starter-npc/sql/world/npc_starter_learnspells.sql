@@ -854,7 +854,7 @@ INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `requi
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 7, 403, 1, -1, 'Lightning Bolt (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 7, 8017, 1, -1, 'Rockbiter Weapon (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 7, 8042, 4, -1, 'Earth Shock (Rank 1)');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 7, 8071, 4, -1, 1, 'Stoneskin Totem (Rank 1)');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 7, 8071, 4, -1, -1, 'Stoneskin Totem (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 7, 332, 6, 331, 'Healing Wave (Rank 2)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 7, 2484, 6, -1, 'Earthbind Totem');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 7, 324, 8, -1, 'Lightning Shield (Rank 1)');
@@ -862,7 +862,7 @@ INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `requi
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 7, 5730, 8, -1, 'Stoneclaw Totem (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 7, 8018, 8, 8017, 'Rockbiter Weapon (Rank 2)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 7, 8044, 8, 8042, 'Earth Shock (Rank 2)');
-INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 7, 3599, 10, -1, 1, 'Searing Totem (Rank 1)');
+INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `requires_quest`, `comment`) VALUES (0, -1, 7, 3599, 10, -1, -1, 'Searing Totem (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 7, 8024, 10, -1, 'Flametongue Weapon (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 7, 8050, 10, -1, 'Flame Shock (Rank 1)');
 INSERT INTO `mod_learnspells` (`type`, `race_id`, `class_id`, `spell_id`, `required_level`, `required_spell_id`, `comment`) VALUES (0, -1, 7, 8075, 10, -1, 'Strength of Earth Totem (Rank 1)');
