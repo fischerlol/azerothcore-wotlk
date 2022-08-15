@@ -9,31 +9,32 @@
 #include "Group.h"
 #include "DBUpdater.h"
 
-#define SPELL_AURA_HARDCORE     3758285
+#define SPELL_AURA_HARDCORE      3758285
 
-#define GOSSIP_OPTION_HARDCORE   1
-#define GOSSIP_OPTION_BOOST     100
-#define GOSSIP_BACK             999
+#define GOSSIP_OPTION_HARDCORE    1
+#define GOSSIP_OPTION_BOOST      100
+#define GOSSIP_BACK              999
 
-#define NPC_TEXT_HARDCORE       70000
-#define NPC_TEXT_BOOST          70001
+#define NPC_TEXT_HARDCORE        70000
+#define NPC_TEXT_BOOST           70001
 
-#define GOSSIP_HELLO_HARDCORE   62000
-#define GOSSIP_HELLO_BOOST      62001
+#define GOSSIP_HELLO_HARDCORE    62000
+#define GOSSIP_HELLO_BOOST       62001
 
-#define GOSSIP_SELECT_HARDCORE  63000
-#define GOSSIP_SELECT_BOOST     63001
-#define GOSSIP_SELECT_BACK      63002
+#define GOSSIP_SELECT_HARDCORE   63000
+#define GOSSIP_SELECT_BOOST      63001
+#define GOSSIP_SELECT_BACK       63002
 
-#define ITEM_CONTAINER          90000
-#define ITEM_ARMOR              91000
-#define ITEM_WEAPON             92000
+#define ITEM_CONTAINER           90000
+#define ITEM_ARMOR               91000
+#define ITEM_WEAPON              92000
 
-#define ITEM_ARROWS             2515
-#define ITEM_BULLETS            2519
+#define ITEM_ARROWS              2515
+#define ITEM_BULLETS             2519
 
-#define ITEM_STARTER_ARROWS     2512
-#define ITEM_STARTER_BULLETS    2516
+#define ITEM_STARTER_ARROWS      2512
+#define ITEM_STARTER_BULLETS     2516
+#define ITEM_STARTER_SOUL_SHARD  6265
 
 struct ClassSpells
 {
@@ -170,22 +171,16 @@ public:
 
     void DestroyProjectiles(Player* player)
     {
-        if (player->HasItemCount(ITEM_STARTER_BULLETS, 200, false))
-            player->DestroyItemCount(ITEM_STARTER_BULLETS, 200, true, true);
+        if (player->HasItemCount(ITEM_STARTER_BULLETS, player->GetItemCount(ITEM_STARTER_BULLETS), false))
+            player->DestroyItemCount(ITEM_STARTER_BULLETS, player->GetItemCount(ITEM_STARTER_BULLETS), true, true);
 
-        if (player->HasItemCount(ITEM_STARTER_ARROWS, 200, false))
-            player->DestroyItemCount(ITEM_STARTER_ARROWS, 200, true, true);
+        if (player->HasItemCount(ITEM_STARTER_ARROWS, player->GetItemCount(ITEM_STARTER_ARROWS), false))
+            player->DestroyItemCount(ITEM_STARTER_ARROWS, player->GetItemCount(ITEM_STARTER_ARROWS), true, true);
 
-        if (player->HasItemCount(ITEM_ARROWS, 1200, false))
+        if (player->HasItemCount(ITEM_ARROWS, player->GetItemCount(ITEM_STARTER_ARROWS), false))
             player->SetAmmo(ITEM_ARROWS);
 
-        if (player->HasItemCount(ITEM_BULLETS, 1200, false))
-            player->SetAmmo(ITEM_BULLETS);
-
-        if (player->HasItemCount(ITEM_ARROWS, 200, false))
-            player->SetAmmo(ITEM_ARROWS);
-
-        if (player->HasItemCount(ITEM_BULLETS, 200, false))
+        if (player->HasItemCount(ITEM_BULLETS, player->GetItemCount(ITEM_STARTER_BULLETS), false))
             player->SetAmmo(ITEM_BULLETS);
     }
 
@@ -368,12 +363,12 @@ public:
             if (player->getRace() == RACE_TAUREN || player->getRace() == RACE_DWARF)
             {
                 player->AddItem(ITEM_CONTAINER + 5, 1);
-                player->AddItem(ITEM_BULLETS, 1200);
+                player->AddItem(ITEM_BULLETS, 1000);
             }
             else
             {
                 player->AddItem(ITEM_CONTAINER + 4, 1);
-                player->AddItem(ITEM_ARROWS, 1200);
+                player->AddItem(ITEM_ARROWS, 1000);
             }
             break;
         case CLASS_ROGUE:
@@ -404,6 +399,7 @@ public:
             break;
         case CLASS_WARLOCK:
             player->AddItem(ITEM_CONTAINER + 12, 1);
+            player->AddItem(ITEM_STARTER_SOUL_SHARD, 20);
             break;
         case CLASS_DRUID:
             player->AddItem(ITEM_CONTAINER + 13, 1);
