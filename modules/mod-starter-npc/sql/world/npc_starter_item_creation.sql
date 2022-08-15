@@ -330,6 +330,7 @@ call create_staff(@base_item_weapon+8, "Initiate's Battle Staff", '', @base_item
 call create_shield(@base_item_weapon+9, "Initiate's Wooden Shield", '', @base_item_weapon+9, @flags_default, @block_value, 0, 471, 0, 0, 0, 9, 75, 9396, 1);
 call create_shield(@base_item_weapon+10, "Initiate's Wooden Buckler", '', @base_item_weapon+10, @flags_default, @block_value, 0, 471, 0, 0, 0, 9, 75, 7517, 1);
 call create_gun(@base_item_weapon+11, "Initiate's Blunderbuss", '', @base_item_weapon+11, @flags_default, @crit_rating, 1, 25, 47, 2800, 75, 9136, 1);
+call create_one_hand_dagger(@base_item_weapon+12, "Initiate's Dagger", '', @base_item_weapon+12, @flags_default, @crit_rating, 2, 15, 28, 1700, 75, 9136, 1);
 
 /*
 * Warrior
@@ -525,6 +526,7 @@ CALL create_container_loot(@base_item_container+6, @base_item_armor+26, @min_cou
 CALL create_container_loot(@base_item_container+6, @base_item_armor+27, @min_count_1, @max_count_1);
 CALL create_container_loot(@base_item_container+6, @base_item_weapon+2, @min_count_1, @max_count_1);
 CALL create_container_loot(@base_item_container+6, @base_item_weapon+4, @min_count_2, @max_count_2);
+CALL create_container_loot(@base_item_container+6, @base_item_weapon+12, @min_count_1, @max_count_1);
 
 -- Rogue Container 2 (Axe/Bow)
 CALL create_item_container(@base_item_container+7, @base_item_container+7);
@@ -537,6 +539,7 @@ CALL create_container_loot(@base_item_container+7, @base_item_armor+26, @min_cou
 CALL create_container_loot(@base_item_container+7, @base_item_armor+27, @min_count_1, @max_count_1);
 CALL create_container_loot(@base_item_container+7, @base_item_weapon+2, @min_count_1, @max_count_1);
 CALL create_container_loot(@base_item_container+7, @base_item_weapon+6, @min_count_2, @max_count_2);
+CALL create_container_loot(@base_item_container+7, @base_item_weapon+12, @min_count_1, @max_count_1);
 
 -- Rogue Container 3 (Sword/Gun)
 CALL create_item_container(@base_item_container+8, @base_item_container+8);
@@ -549,6 +552,7 @@ CALL create_container_loot(@base_item_container+8, @base_item_armor+26, @min_cou
 CALL create_container_loot(@base_item_container+8, @base_item_armor+27, @min_count_1, @max_count_1);
 CALL create_container_loot(@base_item_container+8, @base_item_weapon+11, @min_count_1, @max_count_1);
 CALL create_container_loot(@base_item_container+8, @base_item_weapon+4, @min_count_2, @max_count_2);
+CALL create_container_loot(@base_item_container+8, @base_item_weapon+12, @min_count_1, @max_count_1);
 
 -- Priest
 CALL create_item_container(@base_item_container+9, @base_item_container+9);
